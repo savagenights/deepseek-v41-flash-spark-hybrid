@@ -1,0 +1,32 @@
+{
+  "started": 1793491064.2207744,
+  "original_verified": true,
+  "hybrid_restored": true,
+  "original_ready_seconds": 40.30629324913025,
+  "restored": {
+    "pid": 3451231,
+    "container_id": "2c91ca390ca9b2d29225ac84772cb4eb6b77ae815b115d68a9be4bfb35da45f2",
+    "health": {
+      "status": "ok",
+      "model": "DeepSeek-V4.1-Flash-1017",
+      "model_ids": [
+        "DeepSeek-V4.1-Flash-1017"
+      ],
+      "max_batch_size": 4,
+      "warming": false,
+      "memory": {
+        "active": 112698042660,
+        "cache": 0,
+        "peak": 112698042660
+      },
+      "live": {
+        "connections": 0,
+        "waiting": 0,
+        "decode_tokens_per_second": 0.0,
+        "prefill_tokens_per_second": 0.0
+      }
+    }
+  },
+  "hybrid_restore_seconds": 37.28265929222107,
+  "finished": 1793491141.8132894
+}

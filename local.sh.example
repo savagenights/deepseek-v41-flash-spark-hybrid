@@ -1,0 +1,7 @@
+# Copy to scripts/local.sh (or .env) and fill in for your pair. Never commit the copy.
+# The worker is an ssh target reachable over the direct ConnectX-7 link.
+WORKER="user@10.100.40.1"
+# The head address the worker mounts the Hugging Face cache from.
+NFS_SERVER="10.100.40.2"
+# Pin the checkpoint revision; squashed HF history makes "main" unreproducible.
+MODEL_REVISION="45ee5d0fd106c94a3d77f721e09cbb2f50e5a16b"

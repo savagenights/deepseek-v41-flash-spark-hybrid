@@ -1,0 +1,581 @@
+diff --git a/zig/src/core/engine_api.zig b/zig/src/core/engine_api.zig
+index 1234369f..7abeaef9 100644
+--- a/zig/src/core/engine_api.zig
++++ b/zig/src/core/engine_api.zig
+@@ -8,6 +8,7 @@ pub const Id = u64;
+ 
+ /// One request's sampling (Python's exact_sampling.Sampling); a request without one decodes greedily.
+ pub const Sampling = lanes.Sampling;
++pub const grammar = lanes.grammar;
+ 
+ /// A prompt's reproducible seed (``seed_for``), for requests that name none.
+ pub const seedFor = lanes.sampling.seedFor;
+@@ -49,7 +50,7 @@ pub const CallLex = struct {
+ 
+ /// response_format and the guided_* fields: every token keeps the reply inside this grammar.
+ pub const Structure = struct {
+-    kind: enum { json, json_schema, regex, choice, grammar },
++    kind: grammar.Kind,
+     /// The schema (JSON text), regex, choices (a JSON array) or EBNF; empty for any JSON object.
+     text: []const u8 = "",
+     /// With thinking on, the grammar starts after this token.
+@@ -87,6 +88,8 @@ pub const Request = struct {
+     /// Set only when ``Info`` says the engine enforces it.
+     call: ?CallGate = null,
+     structure: ?Structure = null,
++    /// Owned by the HTTP request until the engine's finished event (including cancellation).
++    constraint: ?*grammar.Constraint = null,
+     /// Stop a short exact cycle while the think block is open.
+     loop_guard: bool = false,
+ };
+diff --git a/zig/src/core/lane_host.zig b/zig/src/core/lane_host.zig
+index 99177d26..2cb262da 100644
+--- a/zig/src/core/lane_host.zig
++++ b/zig/src/core/lane_host.zig
+@@ -365,7 +365,7 @@ pub const LaneHost = struct {
+             .max_new = r.max_tokens,
+             .eos = r.eos,
+             .sampling = r.sampling,
+-            .drafts = r.drafts,
++            .drafts = r.drafts and r.constraint == null,
+             .proposer = job.proposer.proposer(),
+             .stop_check = if (r.stop) |s| .{ .ptr = s.ctx, .check = s.check } else null,
+             .cancel_check = .{ .ptr = job, .check = cancelled },
+@@ -389,6 +389,7 @@ pub const LaneHost = struct {
+             job.proposer.deinit();
+             return h.drop(job, "out of memory");
+         };
++        job.stream.constraint = r.constraint;
+         job.started = true;
+         const began = std.Io.Clock.awake.now(h.io).toNanoseconds();
+         job.began = began;
+@@ -827,4 +828,6 @@ test "prefill interleave: a decoding stream keeps getting tokens and its cancel
+     try std.testing.expectEqual(Reason.cancelled, a.wait());
+ }
+ 
+-test { _ = @import("lane_host_test.zig"); }
++test {
++    _ = @import("lane_host_test.zig");
++}
+diff --git a/zig/src/core/lanes/grammar.zig b/zig/src/core/lanes/grammar.zig
+new file mode 100644
+index 00000000..3b3e0531
+--- /dev/null
++++ b/zig/src/core/lanes/grammar.zig
+@@ -0,0 +1,146 @@
++//! Hybrid structured decoding, adapted from TensorFold 20ad778's core/lanes/grammar.zig.
++//! Uses the same xgrammar C ABI, but intentionally supports serial structured requests only.
++//! Ordinary requests keep the original sampler and speculative fast path.
++const std = @import("std");
++const Allocator = std.mem.Allocator;
++
++pub const Kind = enum(u8) { json, json_schema, regex, choice, grammar };
++const Fns = struct {
++    open: *const fn ([*]const u8, usize, c_int, [*]const i32, c_int, [*]u8, usize) callconv(.c) ?*anyopaque,
++    close: *const fn (*anyopaque) callconv(.c) void,
++    words: *const fn (*anyopaque) callconv(.c) c_int,
++    compile: *const fn (*anyopaque, c_int, [*]const u8, usize, [*]u8, usize) callconv(.c) ?*anyopaque,
++    free: *const fn (*anyopaque) callconv(.c) void,
++    matcher: *const fn (*anyopaque) callconv(.c) ?*anyopaque,
++    matcher_free: *const fn (*anyopaque) callconv(.c) void,
++    accept: *const fn (*anyopaque, i32) callconv(.c) c_int,
++    terminated: *const fn (*anyopaque) callconv(.c) c_int,
++    fill: *const fn (*anyopaque, [*]i32, c_int) callconv(.c) c_int,
++};
++/// The upstream-compatible ABI, also used by host-only matcher stand-ins.
++pub const Library = Fns;
++var loaded: ?Fns = null;
++var mutex: std.atomic.Mutex = .unlocked;
++
++fn load(io: std.Io, a: Allocator) !Fns {
++    while (!mutex.tryLock()) std.atomic.spinLoopHint();
++    defer mutex.unlock();
++    if (loaded) |f| return f;
++    const exe = try std.process.executableDirPathAlloc(io, a);
++    defer a.free(exe);
++    const name = if (@import("builtin").os.tag == .macos) "libtfgrammar.dylib" else "libtfgrammar.so";
++    const installed = try std.fs.path.join(a, &.{ exe, "..", "lib", name });
++    defer a.free(installed);
++    // Keep the library mapped for the process lifetime; its callbacks outlive Compiler.open.
++    var dl = std.DynLib.open(installed) catch (std.DynLib.open(name) catch return error.NoGrammarLibrary);
++    var f: Fns = undefined;
++    const info = @typeInfo(Fns).@"struct";
++    inline for (info.field_names, info.field_types) |field, T| {
++        @field(f, field) = dl.lookup(T, "tfg_" ++ field) orelse {
++            dl.close();
++            return error.MissingGrammarSymbol;
++        };
++    }
++    loaded = f;
++    return f;
++}
++
++pub const Compiler = struct {
++    f: Fns,
++    handle: *anyopaque,
++    words: usize,
++    mutex: std.Io.Mutex = .init,
++
++    pub fn open(io: std.Io, a: Allocator, tokenizer: []const u8, vocab: u32, stops: []const u32) !Compiler {
++        const f = try load(io, a);
++        var message: [512]u8 = @splat(0);
++        const h = f.open(tokenizer.ptr, tokenizer.len, @intCast(vocab), @ptrCast(stops.ptr), @intCast(stops.len), &message, message.len) orelse return error.GrammarSetup;
++        errdefer f.close(h);
++        const words = f.words(h);
++        if (words <= 0 or @as(u32, @intCast(words)) != (vocab + 31) / 32) return error.GrammarVocabularyMismatch;
++        return .{ .f = f, .handle = h, .words = @intCast(words) };
++    }
++
++    pub fn close(c: *Compiler) void {
++        c.f.close(c.handle);
++    }
++
++    fn compile(c: *Compiler, io: std.Io, kind: Kind, text: []const u8) !*anyopaque {
++        if (text.len > 64 << 10) return error.GrammarTooLarge;
++        c.mutex.lockUncancelable(io);
++        defer c.mutex.unlock(io);
++        var message: [512]u8 = @splat(0);
++        return c.f.compile(c.handle, @backingInt(kind), text.ptr, text.len, &message, message.len) orelse return error.InvalidGrammar;
++    }
++
++    /// Run before streaming headers; malformed or unsupported grammars must fail closed.
++    pub fn validate(c: *Compiler, io: std.Io, kind: Kind, text: []const u8) !void {
++        const compiled = try c.compile(io, kind, text);
++        c.f.free(compiled);
++    }
++
++    pub fn constraint(c: *Compiler, a: Allocator, io: std.Io, kind: Kind, text: []const u8, after: ?u32) !*Constraint {
++        const compiled = try c.compile(io, kind, text);
++        defer c.f.free(compiled);
++        const matcher = c.f.matcher(compiled) orelse return error.GrammarSetup;
++        errdefer c.f.matcher_free(matcher);
++        const bits = try a.alloc(u32, c.words);
++        errdefer a.free(bits);
++        const out = try a.create(Constraint);
++        out.* = .{ .f = c.f, .handle = matcher, .bits = bits, .after = after, .active = after == null };
++        return out;
++    }
++};
++
++pub const Constraint = struct {
++    f: Fns,
++    handle: *anyopaque,
++    bits: []u32,
++    after: ?u32,
++    active: bool,
++
++    pub fn deinit(c: *Constraint, a: Allocator) void {
++        c.f.matcher_free(c.handle);
++        a.free(c.bits);
++        a.destroy(c);
++    }
++
++    /// Null only during the unconstrained reasoning block; never after grammar completion.
++    pub fn next(c: *Constraint) !?[]const u32 {
++        if (!c.active) return null;
++        if (c.f.terminated(c.handle) != 0) return error.GrammarAlreadyComplete;
++        if (c.f.fill(c.handle, @ptrCast(c.bits.ptr), @intCast(c.bits.len)) != 0) return error.GrammarMask;
++        for (c.bits) |word| if (word != 0) return c.bits;
++        return error.GrammarDeadEnd;
++    }
++
++    pub fn follow(c: *Constraint, token: u32) !void {
++        if (!c.active) {
++            c.active = token == c.after.?;
++            return;
++        }
++        if (c.f.accept(c.handle, @intCast(token)) != 1) return error.InadmissibleGrammarToken;
++    }
++};
++
++/// Host-only reference path: apply before greedy or keyed sampling, never after token selection.
++pub fn maskLogits(logits: []f32, bits: []const u32) !void {
++    if (bits.len < (logits.len + 31) / 32) return error.GrammarVocabularyMismatch;
++    var any = false;
++    for (logits, 0..) |*value, token| {
++        const allowed = (bits[token / 32] & (@as(u32, 1) << @as(u5, @intCast(token % 32)))) != 0;
++        if (!allowed) value.* = -std.math.inf(f32) else any = true;
++    }
++    if (!any) return error.GrammarDeadEnd;
++}
++
++test "mask permits only allowed vocabulary positions and refuses an empty mask" {
++    var row = [_]f32{ 100, 2, 3, 200 };
++    try maskLogits(&row, &.{0b0110});
++    try std.testing.expectEqual(-std.math.inf(f32), row[0]);
++    try std.testing.expectEqual(@as(f32, 2), row[1]);
++    try std.testing.expectEqual(@as(f32, 3), row[2]);
++    try std.testing.expectEqual(-std.math.inf(f32), row[3]);
++    try std.testing.expectError(error.GrammarDeadEnd, maskLogits(&row, &.{0}));
++    try std.testing.expectError(error.GrammarVocabularyMismatch, maskLogits(&row, &.{}));
++}
+diff --git a/zig/src/core/lanes/grammar_test.zig b/zig/src/core/lanes/grammar_test.zig
+new file mode 100644
+index 00000000..1a52564b
+--- /dev/null
++++ b/zig/src/core/lanes/grammar_test.zig
+@@ -0,0 +1,99 @@
++//! Host-only matcher lifetime, isolation, reasoning transition, and fail-closed checks.
++const std = @import("std");
++const grammar = @import("grammar.zig");
++const a = std.testing.allocator;
++
++const Fake = struct {
++    plan: []const u32,
++    at: usize = 0,
++    freed: bool = false,
++
++    fn accept(ptr: *anyopaque, token: i32) callconv(.c) c_int {
++        const f: *Fake = @ptrCast(@alignCast(ptr));
++        if (f.at == f.plan.len or token < 0 or f.plan[f.at] != @as(u32, @intCast(token))) return 0;
++        f.at += 1;
++        return 1;
++    }
++    fn terminated(ptr: *anyopaque) callconv(.c) c_int {
++        const f: *Fake = @ptrCast(@alignCast(ptr));
++        return if (f.at == f.plan.len) 1 else 0;
++    }
++    fn fill(ptr: *anyopaque, words: [*]i32, n: c_int) callconv(.c) c_int {
++        const f: *Fake = @ptrCast(@alignCast(ptr));
++        const bits: [*]u32 = @ptrCast(words);
++        @memset(bits[0..@intCast(n)], 0);
++        if (f.at == f.plan.len) return -1;
++        const token = f.plan[f.at];
++        bits[token / 32] |= @as(u32, 1) << @as(u5, @intCast(token % 32));
++        return 0;
++    }
++    fn free(ptr: *anyopaque) callconv(.c) void {
++        const f: *Fake = @ptrCast(@alignCast(ptr));
++        f.freed = true;
++    }
++
++    fn constraint(f: *Fake, after: ?u32) !*grammar.Constraint {
++        // These are the only C callbacks Constraint uses. Compiler's callbacks are never invoked here.
++        var library: grammar.Library = undefined;
++        library.accept = accept;
++        library.terminated = terminated;
++        library.fill = fill;
++        library.matcher_free = free;
++        const bits = try a.alloc(u32, 2);
++        errdefer a.free(bits);
++        const c = try a.create(grammar.Constraint);
++        c.* = .{ .f = library, .handle = f, .bits = bits, .after = after, .active = after == null };
++        return c;
++    }
++};
++
++test "a rejected token leaves the grammar unchanged; completion never unmasks" {
++    var fake: Fake = .{ .plan = &.{ 1, 33, 2 } };
++    const c = try fake.constraint(null);
++    defer c.deinit(a);
++    try std.testing.expectEqual(@as(u32, 2), (try c.next()).?[0]);
++    try std.testing.expectError(error.InadmissibleGrammarToken, c.follow(0));
++    try std.testing.expectEqual(@as(usize, 0), fake.at);
++    try c.follow(1);
++    try std.testing.expectEqual(@as(u32, 2), (try c.next()).?[1]);
++    try c.follow(33);
++    try std.testing.expectEqual(@as(u32, 4), (try c.next()).?[0]);
++    try c.follow(2);
++    try std.testing.expectError(error.GrammarAlreadyComplete, c.next());
++}
++
++test "reasoning stays unconstrained until the close token and does not feed that token into JSON" {
++    var fake: Fake = .{ .plan = &.{ 1, 2 } };
++    const c = try fake.constraint(55);
++    try std.testing.expectEqual(@as(?[]const u32, null), try c.next());
++    try c.follow(7);
++    try std.testing.expect(!c.active);
++    try c.follow(55);
++    try std.testing.expect(c.active);
++    try std.testing.expectEqual(@as(usize, 0), fake.at);
++    try std.testing.expectEqual(@as(u32, 2), (try c.next()).?[0]);
++    c.deinit(a);
++    try std.testing.expect(fake.freed);
++}
++
++test "interleaved requests have independent matchers" {
++    var first: Fake = .{ .plan = &.{ 1, 33, 2 } };
++    var second: Fake = .{ .plan = &.{ 33, 1, 2 } };
++    const c1 = try first.constraint(null);
++    defer c1.deinit(a);
++    const c2 = try second.constraint(null);
++    defer c2.deinit(a);
++    try c1.follow(1);
++    try std.testing.expectEqual(@as(usize, 1), first.at);
++    try std.testing.expectEqual(@as(usize, 0), second.at);
++    try std.testing.expectEqual(@as(u32, 2), (try c2.next()).?[1]);
++    try std.testing.expectError(error.InadmissibleGrammarToken, c2.follow(1));
++    try c2.follow(33);
++    try std.testing.expectEqual(@as(u32, 2), (try c2.next()).?[0]);
++    try std.testing.expectEqual(@as(u32, 2), (try c1.next()).?[1]);
++}
++
++test "padding-only masks cannot select an out-of-vocabulary token" {
++    var row = [_]f32{ 1, 2, 3, 4 };
++    try std.testing.expectError(error.GrammarDeadEnd, grammar.maskLogits(&row, &.{@as(u32, 1) << 31}));
++}
+diff --git a/zig/src/core/lanes/lanes.zig b/zig/src/core/lanes/lanes.zig
+index 74ca8e1b..f50c2198 100644
+--- a/zig/src/core/lanes/lanes.zig
++++ b/zig/src/core/lanes/lanes.zig
+@@ -13,6 +13,7 @@ pub const gpu_rule = @import("gpu_rule.zig");
+ pub const gpu_full = @import("gpu_full.zig");
+ pub const depth = @import("depth.zig");
+ pub const config = @import("config.zig");
++pub const grammar = @import("grammar.zig");
+ pub const stream = @import("stream.zig");
+ pub const backend = @import("backend.zig");
+ pub const events = @import("events.zig");
+@@ -32,4 +33,5 @@ test {
+     std.testing.refAllDecls(@This());
+     _ = @import("engine_test.zig");
+     _ = @import("gpu_full_test.zig");
++    _ = @import("grammar_test.zig");
+ }
+diff --git a/zig/src/core/lanes/stream.zig b/zig/src/core/lanes/stream.zig
+index 2e17c40c..13ad7d5e 100644
+--- a/zig/src/core/lanes/stream.zig
++++ b/zig/src/core/lanes/stream.zig
+@@ -163,6 +163,8 @@ pub const Stream = struct {
+     max_new: u32,
+     eos: []const u32,
+     sampling: ?Sampling,
++    /// Request-owned matcher; only the serial structured-output path reads it.
++    constraint: ?*@import("grammar.zig").Constraint = null,
+     drafts: bool,
+     proposer: ?Proposer,
+     stop_check: ?StopCheck,
+diff --git a/zig/src/families/dsv41/lanes.zig b/zig/src/families/dsv41/lanes.zig
+index 2c76760c..db963cfe 100644
+--- a/zig/src/families/dsv41/lanes.zig
++++ b/zig/src/families/dsv41/lanes.zig
+@@ -234,6 +234,20 @@ pub fn draw(row: []const f32, position: u64, s: ?lanes.Sampling) !u32 {
+     return @intCast(t);
+ }
+ 
++/// Structured requests alone take a serial, host-masked draw; ordinary draws are unchanged.
++fn drawStream(gpa: std.mem.Allocator, row: []const f32, position: u64, s: *lanes.Stream) !u32 {
++    const constraint = s.constraint orelse return draw(row, position, s.sampling);
++    const mask = try constraint.next();
++    const token = if (mask) |bits| blk: {
++        const masked = try gpa.dupe(f32, row);
++        defer gpa.free(masked);
++        try lanes.grammar.maskLogits(masked, bits);
++        break :blk try draw(masked, position, s.sampling);
++    } else try draw(row, position, s.sampling);
++    try constraint.follow(token);
++    return token;
++}
++
+ /// Where rank 0's backend calls spend their time (ns, summed; --profile): a round's frame to rank 1, its forward
+ /// and absorb (synchronized apart), the logits' copy to the host and the draws; the drafter passes; the prefills.
+ pub const Profile = struct {
+@@ -592,7 +606,7 @@ pub const Lanes = struct {
+             std.crypto.hash.sha2.Sha256.hash(std.mem.sliceAsBytes(logits), &dg, .{});
+             std.debug.print("{{\"prompt_logits\": \"{s}\", \"sha256\": \"{s}\"}}\n", .{ s.id, std.fmt.bytesToHex(dg, .lower) });
+         }
+-        const token = try draw(logits, len, s.sampling);
++        const token = try drawStream(gpa, logits, len, s);
+         self.streams.getPtr(s).?.first = self.take(token);
+     }
+ 
+@@ -656,6 +670,10 @@ pub const Lanes = struct {
+         // every row greedy: the device's argmax (R tokens back); else the logits for the host's draws
+         var greedy = true;
+         for (windows) |w| {
++            if (w.stream.constraint != null) {
++                if (w.rows() != 1) return error.StructuredDraftsUnsupported;
++                greedy = false;
++            }
+             if (w.stream.sampling) |sm| if (sm.temperature > 0) {
+                 greedy = false;
+             };
+@@ -676,7 +694,7 @@ pub const Lanes = struct {
+         const V = m.vocab;
+         for (windows, out, 0..) |w, *o, k| {
+             const row0 = self.built.wins[k].row;
+-            for (0..w.rows()) |r| o.sampled[r] = if (greedy) tokens[row0 + r] else try draw(logits[(row0 + r) * V ..][0..V], w.positions[r], w.stream.sampling);
++            for (0..w.rows()) |r| o.sampled[r] = if (greedy) tokens[row0 + r] else try drawStream(gpa, logits[(row0 + r) * V ..][0..V], w.positions[r], w.stream);
+             const l = self.streams.getPtr(w.stream).?;
+             @memcpy(o.drafts[0..w.held], l.held[0..w.held]);
+             @memcpy(o.drafts[w.held..][0..w.tokens.len], w.tokens);
+diff --git a/zig/src/native/cuda.zig b/zig/src/native/cuda.zig
+index ba8f5efe..645f7a2b 100644
+--- a/zig/src/native/cuda.zig
++++ b/zig/src/native/cuda.zig
+@@ -377,7 +377,7 @@ fn openWith(comptime F: type, a: Allocator, gpa: Allocator, io: std.Io, o: api.O
+     };
+     // the family cuts its own prompt grid from position 0, as `tensorfold run` does: prefill_step 0
+     const vision: ?api.Vision = if (@hasField(@TypeOf(loaded), "vision")) loaded.vision else null;
+-    try h.serve(io, loaded.facts, loaded.rows, .{ .lanes = streams, .context_window = @intCast(window), .startup = h.startup, .efforts = familyEfforts(F), .vision = vision, .call_gates = true }, .{ .ctx = loaded.ctx, .text = F.explain });
++    try h.serve(io, loaded.facts, loaded.rows, .{ .lanes = streams, .context_window = @intCast(window), .startup = h.startup, .efforts = familyEfforts(F), .vision = vision, .call_gates = true, .structures = std.mem.eql(u8, F.model_type, "deepseek_v41") and (if (std.c.getenv("TF_HYBRID_GRAMMAR")) |v| std.mem.eql(u8, std.mem.span(v), "1") else false) }, .{ .ctx = loaded.ctx, .text = F.explain });
+     opened = true;
+     return .{ .engine = h.host.engine(), .close = Host.close, .ctx = h };
+ }
+diff --git a/zig/src/server/chat.zig b/zig/src/server/chat.zig
+index 91dadbb8..fce11eb4 100644
+--- a/zig/src/server/chat.zig
++++ b/zig/src/server/chat.zig
+@@ -199,7 +199,7 @@ pub fn prepare(srv: *Server, cx: *Cx, input: Input, gone: anytype) Failure!Prepa
+             request.think_end = srv.think_close_end;
+         }
+     }
+-    return .{ .input = input, .request = request, .prompt_len = rendered.ids.len, .received = received, .thinking = thinking, .effort = effort, .sampled = sampling != null, .drafts = drafts, .stops = stops_opt, .preparing = preparing };
++    return .{ .input = input, .request = request, .prompt_len = rendered.ids.len, .received = received, .thinking = thinking, .effort = effort, .sampled = sampling != null, .drafts = request.drafts, .stops = stops_opt, .preparing = preparing };
+ }
+ 
+ /// Submit a prepared request and collect its reply; ``sink`` hears the stream (null: not streamed).
+@@ -214,6 +214,14 @@ pub fn generate(srv: *Server, cx: *Cx, prepared: Prepared, sink: ?Sink, gone: an
+     const stops_opt = prepared.stops;
+     var preparing = prepared.preparing;
+     defer release(srv, preparing);
++    var constraint: ?*api.grammar.Constraint = null;
++    defer if (constraint) |c| c.deinit(srv.gpa);
++    if (request.structure) |s| {
++        const compiler = if (srv.grammar_compiler) |*c| c else return cx.refuse("structured-output compiler is unavailable");
++        constraint = compiler.constraint(srv.gpa, srv.io, s.kind, s.text, s.after) catch return cx.refuse("structured-output matcher could not be created");
++        request.constraint = constraint;
++        request.drafts = false;
++    }
+     if (request.background) {
+         while (true) {
+             const now = nowNs(io);
+diff --git a/zig/src/server/hf_text.zig b/zig/src/server/hf_text.zig
+index b7358b41..de7f9ebb 100644
+--- a/zig/src/server/hf_text.zig
++++ b/zig/src/server/hf_text.zig
+@@ -12,6 +12,7 @@ pub const HfText = struct {
+     arena: std.heap.ArenaAllocator,
+     tok: tokenizer.Tokenizer,
+     source: []const u8 = "",
++    tokenizer_json: []const u8 = "",
+     tool_source: []const u8 = "",
+     compiled: ?template.Compiled = null,
+     tool_compiled: ?template.Compiled = null,
+@@ -56,10 +57,16 @@ pub const HfText = struct {
+         t.gpa.destroy(t);
+     }
+ 
++    const JsonSource = struct { doc: std.json.Value = .null, bytes: []const u8 = "" };
++
++    fn readJsonSource(io: std.Io, a: Allocator, dir: []const u8, name: []const u8) JsonSource {
++        const path = std.fs.path.join(a, &.{ dir, name }) catch return .{};
++        const bytes = std.Io.Dir.cwd().readFileAlloc(io, path, a, .limited(64 << 20)) catch return .{};
++        return .{ .doc = std.json.parseFromSliceLeaky(std.json.Value, a, bytes, .{}) catch .null, .bytes = bytes };
++    }
++
+     fn readJson(io: std.Io, a: Allocator, dir: []const u8, name: []const u8) std.json.Value {
+-        const path = std.fs.path.join(a, &.{ dir, name }) catch return .null;
+-        const bytes = std.Io.Dir.cwd().readFileAlloc(io, path, a, .limited(64 << 20)) catch return .null;
+-        return std.json.parseFromSliceLeaky(std.json.Value, a, bytes, .{}) catch .null;
++        return readJsonSource(io, a, dir, name).doc;
+     }
+ 
+     /// chat_template.jinja, else chat_template.json, else tokenizer_config.json's (named: "default", and "tool_use").
+@@ -143,7 +150,9 @@ pub const HfText = struct {
+ 
+     /// The tokens ``add_special_tokens`` adds: TemplateProcessing's single template, or Bert and Roberta's cls and sep.
+     fn readPostProcessor(t: *HfText, io: std.Io, a: Allocator, dir: []const u8) !void {
+-        const doc = readJson(io, a, dir, "tokenizer.json");
++        const document = readJsonSource(io, a, dir, "tokenizer.json");
++        t.tokenizer_json = document.bytes;
++        const doc = document.doc;
+         if (doc != .object) return;
+         const pp = doc.object.get("post_processor") orelse return;
+         var prefix: std.ArrayList(u32) = .empty;
+@@ -201,9 +210,14 @@ pub const HfText = struct {
+             .render = renderFn,
+             .template_source = sourceFn,
+             .special = specialFn,
++            .tokenizer_json = tokenizerJsonFn,
+         } };
+     }
+ 
++    fn tokenizerJsonFn(ctx: *anyopaque) []const u8 {
++        return self(ctx).tokenizer_json;
++    }
++
+     fn specialFn(ctx: *anyopaque, id: u32) bool {
+         const t = self(ctx);
+         const piece = t.tok.id_to_token.get(id) orelse return false;
+diff --git a/zig/src/server/model_text.zig b/zig/src/server/model_text.zig
+index 4f54fe3f..9002a22f 100644
+--- a/zig/src/server/model_text.zig
++++ b/zig/src/server/model_text.zig
+@@ -38,6 +38,8 @@ pub const Text = struct {
+         template_source: *const fn (ctx: *anyopaque) []const u8,
+         /// Whether an id is a special token (an added token flagged special); null: none are known.
+         special: ?*const fn (ctx: *anyopaque, id: u32) bool = null,
++        /// The selected checkpoint's original tokenizer document, for grammar compilation.
++        tokenizer_json: ?*const fn (ctx: *anyopaque) []const u8 = null,
+     };
+ 
+     pub fn encode(t: Text, a: Allocator, text: []const u8, add_special: bool) Error![]u32 {
+@@ -78,9 +80,14 @@ pub const Text = struct {
+         return t.vtable.template_source(t.ctx);
+     }
+ 
++    pub fn tokenizerJson(t: Text) ?[]const u8 {
++        const read = t.vtable.tokenizer_json orelse return null;
++        const document = read(t.ctx);
++        return if (document.len > 0) document else null;
++    }
++
+     pub fn isSpecial(t: Text, id: u32) bool {
+         const f = t.vtable.special orelse return false;
+         return f(t.ctx, id);
+     }
+-
+ };
+diff --git a/zig/src/server/server.zig b/zig/src/server/server.zig
+index 0001a3e4..79340689 100644
+--- a/zig/src/server/server.zig
++++ b/zig/src/server/server.zig
+@@ -57,6 +57,7 @@ pub const Server = struct {
+     io: std.Io,
+     engine: api.Engine,
+     info: api.Info,
++    grammar_compiler: ?api.grammar.Compiler = null,
+     text: model_text.Text,
+     config: Config,
+     keys: ?*auth.Store,
+@@ -84,6 +85,7 @@ pub const Server = struct {
+     pub fn init(gpa: Allocator, io: std.Io, engine: api.Engine, text: model_text.Text, config: Config, keys: ?*auth.Store) !*Server {
+         const srv = try gpa.create(Server);
+         srv.* = .{ .gpa = gpa, .io = io, .engine = engine, .info = engine.info(), .text = text, .config = config, .keys = keys, .metrics = .{ .gpa = gpa }, .store = .{ .gpa = gpa }, .arena = .init(gpa) };
++        errdefer srv.deinit();
+         if (config.keep_warm_s > 0) if (engine.keepaliveTarget()) |target| {
+             srv.keepalive = api.keepalive.Keepalive.start(gpa, io, target, @as(i64, config.keep_warm_s) * std.time.ns_per_s) catch |e| blk: {
+                 log.line("idle keepalive off: {s}", .{@errorName(e)});
+@@ -112,11 +114,16 @@ pub const Server = struct {
+             srv.chunks = try chunk_plan.markers(srv, a, srv.info.prefill_step);
+             log.line("prompt chunks of up to {d},{d:0>3} tokens, cut at replies {d}+ tokens apart", .{ srv.info.prefill_step / 1000, srv.info.prefill_step % 1000, srv.chunks.min_chunk });
+         }
++        if (srv.info.structures) {
++            const tokenizer = text.tokenizerJson() orelse return error.MissingGrammarTokenizer;
++            srv.grammar_compiler = try api.grammar.Compiler.open(io, gpa, tokenizer, text.vocabSize(), srv.eos);
++        }
+         return srv;
+     }
+ 
+     pub fn deinit(srv: *Server) void {
+         if (srv.keepalive) |k| k.stop(); // before the engine's queue goes away
++        if (srv.grammar_compiler) |*compiler| compiler.close();
+         srv.arena.deinit();
+         srv.store.deinit();
+         srv.gpa.destroy(srv);
+@@ -183,7 +190,14 @@ pub const Server = struct {
+         }
+         if (try grammar.spec(cx, f)) |s| {
+             if (!srv.info.structures) return cx.refuse("structured output (response_format and the guided_* fields) is not supported by this engine yet");
++            if (request.call != null) return cx.refuse("structured output combined with forced tool selection is not supported by this hybrid yet");
++            if (thinking and srv.text.tokenId(srv.markers.close) == null) return cx.refuse("structured output with reasoning requires a known reasoning-close token");
++            const budget = if (f.get("thinking_budget")) |v| v.int64() orelse 0 else srv.config.thinking_budget;
++            if (thinking and (budget > 0 or srv.config.loop_guard)) return cx.refuse("structured output with forced reasoning closure is not supported by this hybrid yet");
++            const compiler = if (srv.grammar_compiler) |*c| c else return cx.refuse("structured-output compiler is unavailable");
++            compiler.validate(srv.io, s.kind, s.text) catch return cx.refuse("invalid or unsupported structured-output grammar");
+             request.structure = .{ .kind = s.kind, .text = s.text, .after = if (thinking) srv.text.tokenId(srv.markers.close) else null };
++            request.drafts = false; // no speculative tree may bypass the grammar mask
+         }
+     }
+ 

@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.log
+.env
+local.sh
+model/
+rollback/
+results/
+grammar-build/
+grammar-qualification/
+*.bundle
+*.so
+*.bin

@@ -1,0 +1,101 @@
+{
+  "started": 1793490316.0215416,
+  "finished": 1793490419.028227,
+  "results": [
+    {
+      "name": "merge_intervals",
+      "status": 200,
+      "content": "from typing import List\n\ndef merge_intervals(intervals: List[List[int]]) -> List[List[int]]:\n    if not intervals:\n        return []\n    sorted_intervals = sorted((list(interval) for interval in intervals), key=lambda x: (x[0], x[1]))\n    merged = [sorted_intervals[0]]\n    for start, end in sorted_intervals[1:]:\n        last_start, last_end = merged[-1]\n        if start <= last_end:\n            if end > last_end:\n                merged[-1] = [last_start, end]\n        else:\n            merged.append([start, end])\n    return merged",
+      "reasoning": "",
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 94,
+        "completion_tokens": 135,
+        "total_tokens": 229,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "ttft_s": 0.9717991069774143,
+      "wall_s": 3.0216820649802685,
+      "code_check": {
+        "passed": true
+      },
+      "ok": true
+    },
+    {
+      "name": "toposort",
+      "status": 200,
+      "content": "```python\nimport heapq\nfrom collections import defaultdict\n\ndef toposort(nodes, edges):\n    node_set = set(nodes)\n    if len(node_set) != len(nodes):\n        raise ValueError(\"nodes must be distinct\")\n    for u, v in edges:\n        if u not in node_set or v not in node_set:\n            raise ValueError(\"edge endpoint not in nodes\")\n\n    adj = defaultdict(set)\n    indeg = {n: 0 for n in nodes}\n    for u, v in edges:\n        if v not in adj[u]:\n            adj[u].add(v)\n            indeg[v] += 1\n\n    heap = [n for n in nodes if indeg[n] == 0]\n    heapq.heapify(heap)\n    result = []\n    while heap:\n        u = heapq.heappop(heap)\n        result.append(u)\n        for v in adj[u]:\n            indeg[v] -= 1\n            if indeg[v] == 0:\n                heapq.heappush(heap, v)\n\n    if len(result) != len(nodes):\n        raise ValueError(\"cycle detected\")\n    return result\n```",
+      "reasoning": "",
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 86,
+        "completion_tokens": 240,
+        "total_tokens": 326,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "ttft_s": 0.517983430007007,
+      "wall_s": 4.358309659000952,
+      "code_check": {
+        "passed": true
+      },
+      "ok": true
+    },
+    {
+      "name": "structured-array-7",
+      "status": 200,
+      "content": "{\"values\":  [  \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r 7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r, \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r7 \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r ",
+      "reasoning": "",
+      "finish_reason": "length",
+      "usage": {
+        "prompt_tokens": 28,
+        "completion_tokens": 4096,
+        "total_tokens": 4124,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "ttft_s": 0.6503769340342842,
+      "wall_s": 102.52836610702798,
+      "ok": false,
+      "failure": "{'status': 200, 'content': '{\"values\":  [  \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r 7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r, \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r7 \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r \\r ', 'reasoning': '', 'finish_reason': 'length', 'usage': {'prompt_tokens': 28, 'completion_tokens': 4096, 'total_tokens': 4124, 'prompt_tokens_details': {'cached_tokens': 0}, 'completion_tokens_details': {'reasoning_tokens': 0}}, 'ttft_s': 0.6503769340342842, 'wall_s': 102.52836610702798}"
+    },
+    {
+      "name": "structured-array-9",
+      "status": 200,
+      "content": "{\"values\":  [  \r \r \r \r \r \r \r \r \r \r \r \r \r \r \r 9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ,  9  ]  }",
+      "reasoning": "",
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 28,
+        "completion_tokens": 296,
+        "total_tokens": 324,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "ttft_s": 0.231180474977009,
+      "wall_s": 11.56978783197701,
+      "ok": true
+    }
+  ],
+  "json_token_cap": 4096,
+  "compact_requested": true,
+  "passed": 3,
+  "total": 4
+}

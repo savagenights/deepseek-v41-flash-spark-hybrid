@@ -1,0 +1,23 @@
+[Unit]
+Description=DeepSeek V4.1 Flash Mia numerical engine with qualified structured decoding
+After=network-online.target dsv41.service
+Conflicts=dsv41.service
+StartLimitIntervalSec=0
+ConditionPathExists=%h/spark-hybrid-20261031/grammar-qualification/results/qualified-image-manifest.json
+
+[Service]
+Type=simple
+WorkingDirectory=%h/spark-hybrid-20261031
+ExecStart=/usr/bin/python3 -u %h/spark-hybrid-20261031/supervise_grammar.py
+Restart=always
+RestartSec=10
+TimeoutStopSec=180
+KillMode=mixed
+UMask=0077
+Environment=PYTHONUNBUFFERED=1
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=dsv41-hybrid
+
+[Install]
+WantedBy=default.target

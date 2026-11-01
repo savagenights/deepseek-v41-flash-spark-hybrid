@@ -1,0 +1,63 @@
+{
+  "checked_at": 1793491474.4091816,
+  "serving": "qualified-hybrid",
+  "image": "tensorfold-dsv41:hybrid-grammar-487088aeda6f",
+  "image_id": "sha256:5a3f8e3b99407f8e91b10d6e3a351058d0a7e08e3d8b7b4da1f1e94df5f80259",
+  "source_commit": "487088aeda6f19d9e6328ff273b9c1edbfdbdf83",
+  "units": {
+    "dsv41.service": {
+      "active": "inactive",
+      "enabled": "disabled"
+    },
+    "dsv41-hybrid.service": {
+      "active": "active",
+      "enabled": "enabled"
+    }
+  },
+  "health": {
+    "status": "ok",
+    "model": "DeepSeek-V4.1-Flash-1017",
+    "model_ids": [
+      "DeepSeek-V4.1-Flash-1017"
+    ],
+    "max_batch_size": 4,
+    "warming": false,
+    "memory": {
+      "active": 112738150692,
+      "cache": 0,
+      "peak": 112738150692
+    },
+    "live": {
+      "connections": 0,
+      "waiting": 0,
+      "decode_tokens_per_second": 0.0,
+      "prefill_tokens_per_second": 0.0
+    }
+  },
+  "quality_bench_id": "d89c3476-cbd7-4006-9bcb-cc988ace3d0a",
+  "quality_overall_pct": 97.2,
+  "raw_quality_correct": 766,
+  "raw_quality_total": 807,
+  "new_request_errors": 0,
+  "adversarial_budget_probes": {
+    "grammar-mixed-decode.json": {
+      "passed": 2,
+      "total": 4,
+      "length_capped": 2
+    },
+    "grammar-mixed-decode-compact-4096.json": {
+      "passed": 3,
+      "total": 4,
+      "length_capped": 1
+    },
+    "grammar-mixed-decode-described-512.json": {
+      "passed": 4,
+      "total": 4,
+      "length_capped": 0
+    }
+  },
+  "physical_reboot_tested": false,
+  "disk_sessions_backported": false,
+  "rollback_drill_passed": true,
+  "runbook": "HYBRID-RUNBOOK.md"
+}

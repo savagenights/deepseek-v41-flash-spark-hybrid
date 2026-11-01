@@ -1,0 +1,51 @@
+DeepSeek-V4.1-Flash 2x DGX Spark hybrid (original Mia numerics + host-side constrained decoding)
+Copyright 2026 the contributors of this repository
+
+Our own scripts, documentation and the grammar backport patch
+(patches/0001-host-side-grammar-backport.patch) are licensed under the Apache
+License, Version 2.0 (see LICENSE).
+
+-------------------------------------------------------------------------------
+Upstream components
+
+TensorFold
+Copyright 2026 TensorFold contributors
+https://github.com/ashhart/TensorFold
+Licensed under the Apache License, Version 2.0 from release 0.6.0; releases up to
+0.5.0 were MIT-licensed and that code keeps its MIT notice. Third-party code and
+its licences are listed in TensorFold's THIRD_PARTY_NOTICES.md.
+
+The engine this patch targets is a fork of TensorFold 1.0.2 (upstream commit
+f8fe17d) by BertholomusAI (Albert Lee, https://github.com/bertholomus),
+Copyright 2026, which adds the dsv41 model family for DeepSeek-V4.1-Flash on
+TensorFold 1.0's native Zig engine, tensor-parallel over two NVIDIA GB10 nodes.
+
+Changes made by this project, as required by Apache-2.0 section 4(b):
+
+  - zig/src/core/lanes/grammar.zig      dynamic C ABI loader, grammar compiler,
+                                        request-owned constraints, host logits masks
+  - zig/src/core/lanes/grammar_test.zig grammar test coverage
+  - zig/src/core/lanes/lanes.zig        test integration
+  - zig/src/core/lanes/stream.zig       constraint pointer
+  - zig/src/core/engine_api.zig         grammar/type surface, request constraint
+  - zig/src/core/lane_host.zig          matcher propagation, drafts disabled
+  - zig/src/families/dsv41/lanes.zig    masks applied before prefill/verify draws
+  - zig/src/native/cuda.zig             conditional structures capability
+  - zig/src/server/server.zig           validation before streaming
+  - zig/src/server/chat.zig             matcher lifetime, unsupported combinations
+  - zig/src/server/model_text.zig       tokenizer JSON callback
+  - zig/src/server/hf_text.zig          retain selected tokenizer document
+
+This repository does not redistribute any compiled engine binary, any container
+image, the grammar shared library, or model weights.
+
+-------------------------------------------------------------------------------
+Base model and serving recipe
+
+DeepSeek-V4.1-Flash and the EXL3 weights
+(Mia-AiLab/DeepSeek-V4.1-Flash-1017-EXL3-EAQ-v1-2.9-bpw) belong to their
+publishers and are used under their own terms. The serving recipe
+(https://github.com/MiaAI-Lab/DeepSeek-v4.1-Flash-1017-2x-DGX-Sparks) and its
+five patches belong to MiaAI-Lab.
+
+Nothing in this repository grants rights to those weights, images or recipes.

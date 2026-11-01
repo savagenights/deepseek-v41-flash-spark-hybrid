@@ -1,0 +1,11 @@
+# No RUN steps: compilation happens in a separate, actually cgroup-limited CPU container.
+FROM tensorfold-dsv41:rollback-20261031
+ARG HYBRID_SOURCE
+COPY native/ /opt/tensorfold/native/
+COPY licenses/ /opt/tensorfold/share/doc/hybrid-grammar/runtime-licenses/
+COPY backport.patch build-provenance.json /opt/tensorfold/share/doc/hybrid-grammar/
+ENV TF_HYBRID_GRAMMAR=1
+LABEL owner="code-puppy-7290b8" \
+      tf.hybrid.feature="non-speculative-structured-output" \
+      tf.hybrid.ref="${HYBRID_SOURCE}" \
+      tf.hybrid.upstream="629c524a0ea57512a5342abb498d1b7c25353343"
