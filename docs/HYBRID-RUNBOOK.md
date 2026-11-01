@@ -100,6 +100,34 @@ After successful promotion:
 
 A physical reboot/power-cycle is not part of this test. Boot configuration and automatic pair recovery are checked separately.
 
+### What happens at boot
+
+Verified by inspection, not by a real reboot:
+
+- Head user lingering is enabled (`loginctl show-user cell --property=Linger` -> `yes`), so the user manager starts without a login.
+- `dsv41-hybrid.service` is enabled and linked from `default.target.wants`, so it is pulled in at boot.
+- `docker.service` is enabled on both hosts; `ssh.socket` is enabled on both (socket-activated SSH is normal on Ubuntu, `ssh.service` shows `disabled`).
+- The head exports `/home/cell/.cache/huggingface` read-only to `10.100.40.1`, and `nfs-server` is enabled and active.
+- The worker has no model unit of its own; it is started remotely by the head supervisor over the same passwordless SSH path.
+- Neither rank container has a Docker restart policy, so there is exactly one supervisor after boot.
+
+Ordering caveat: `After=network-online.target` in a **user** unit does not pull that target in, so it is effectively a no-op. The supervisor may start before Docker or the fabric link is ready. That is covered by `Restart=always`, `RestartSec=10` and `StartLimitIntervalSec=0`: a failed start exits non-zero and systemd retries indefinitely.
+
+### Cold start is not free
+
+Nothing pre-loads the weights. The service start *is* the load: ~197 GB of safetensors into unified memory.
+
+Measured on the current pair:
+
+- Head local NVMe, direct I/O: **3.0 GB/s** -> ~66 s for 197 GB.
+- Worker over NFS from the head cache: **1.2 GB/s** -> ~164 s for the same 197 GB (that measurement was against a warm head page cache, so treat it as a lower bound).
+
+The worker's `/hf` is a Docker `local` volume backed by NFS4 (`addr=10.100.40.2`, `ro`, `hard`), mounted by Docker at container start. Because it is a `hard` mount, an unavailable export blocks I/O rather than failing fast.
+
+So expect roughly **3-4 minutes** from boot to healthy, versus the 37-43 s measured for warm restarts. `ready()` has a fixed 600 s deadline; a cold start slow enough to exceed it will exit, systemd will restart the pair, and the load begins again. That is the one boot path worth watching on a real reboot.
+
+Disk headroom is also tight on the head: 324 GB free on a 3.7 TB root filesystem (91% used) with a 711 GB HF cache.
+
 Useful commands on the head:
 
 ```sh
