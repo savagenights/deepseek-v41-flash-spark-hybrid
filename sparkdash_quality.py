@@ -74,6 +74,7 @@ def interrupted(signum, frame):
 
 
 def main():
+    global BASE
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--stage", type=Path, default=DEFAULT_STAGE)
     parser.add_argument("--label", default="Hybrid Mia original kernels plus grammar 487088ae")
@@ -81,7 +82,6 @@ def main():
     args = parser.parse_args()
     if not args.base:
         parser.error("set SPARKDASH_QUALITY_URL or pass --base to your Quality-suite endpoint")
-    global BASE
     BASE = args.base
     stage = args.stage
     signal.signal(signal.SIGTERM, interrupted)

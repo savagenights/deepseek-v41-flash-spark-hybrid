@@ -95,6 +95,8 @@ SPARKDASH_QUALITY_URL  required only for the SparkDash quality runner
 1. `git clone` the Mia recipe at commit `31eea46`; confirm the five deployed patches.
 2. Apply `patches/0001-host-side-grammar-backport.patch` to upstream TensorFold
    `629c524a` plus those five patches; the result is commit `487088ae`.
+   Verified: applying the patch to `11737b98` (the exact five-patch baseline)
+   reproduces tree `af382d6e`, byte-for-byte identical to the deployed commit.
 3. `build_native.sh` (CPU-only container, real cgroup limit), then
    `assemble_grammar.py` to produce the overlay image. `grammar_library_probe.py`
    proves the ABI against the real tokenizer before anything is served.
