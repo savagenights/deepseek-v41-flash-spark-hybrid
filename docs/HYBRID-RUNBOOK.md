@@ -2,6 +2,8 @@
 
 Status: **deployed and serving under systemd**, with the original deployment preserved and the documented rollback exercised end-to-end.
 
+Public source and evidence: https://github.com/thomwebb/deepseek-v41-flash-spark-hybrid
+
 ## What this actually combines
 
 This is not the whole Jay deployment with a few environment changes. That trial was slower. It is a small host-side backport onto the exact deployed Mia engine:
