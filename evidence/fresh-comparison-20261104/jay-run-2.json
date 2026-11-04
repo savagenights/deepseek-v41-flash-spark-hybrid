@@ -1,0 +1,790 @@
+{
+  "benchmark_version": 1,
+  "url": "http://127.0.0.1:8888",
+  "model": "DeepSeek-V4.1-Flash-1017",
+  "started_unix_s": 1793825971.7745888,
+  "budget_s": 280,
+  "request_timeout_s": 40,
+  "thinking": false,
+  "seed": 7,
+  "temperature": 0,
+  "total_requested_completion_token_cap": 4400,
+  "request_count": 14,
+  "results": [
+    {
+      "label": "sequential_code_1",
+      "group": "code",
+      "max_tokens": 512,
+      "usage": {
+        "prompt_tokens": 35,
+        "completion_tokens": 512,
+        "total_tokens": 547,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "finish_reason": "length",
+      "done": true,
+      "content": "```python\nfrom collections import OrderedDict\n\n\nclass LRUCache:\n    \"\"\"A fixed-capacity Least Recently Used (LRU) cache.\n\n    Uses an OrderedDict to track insertion/access order. The most recently\n    used item is moved to the end; when capacity is exceeded, the least\n    recently used item (at the front) is evicted.\n    \"\"\"\n\n    def __init__(self, capacity: int):\n        \"\"\"Initialize the cache with a positive integer capacity.\"\"\"\n        if capacity <= 0:\n            raise ValueError(\"capacity must be a positive integer\")\n        self.capacity = capacity\n        # OrderedDict preserves insertion order; we treat the right end as MRU.\n        self._data: \"OrderedDict[object, object]\" = OrderedDict()\n\n    def get(self, key):\n        \"\"\"Return the value for `key`, or -1 if not present.\n\n        Accessing a key marks it as most recently used.\n        \"\"\"\n        if key not in self._data:\n            return -1\n        # Move to the end to mark as most recently used.\n        self._data.move_to_end(key)\n        return self._data[key]\n\n    def put(self, key, value) -> None:\n        \"\"\"Insert or update `key` with `value`.\n\n        If the key already exists, update its value and mark it as MRU.\n        If inserting a new key exceeds capacity, evict the LRU entry.\n        \"\"\"\n        if key in self._data:\n            # Update existing entry and refresh its recency.\n            self._data[key] = value\n            self._data.move_to_end(key)\n        else:\n            self._data[key] = value\n            # Evict the least recently used item if over capacity.\n            if len(self._data) > self.capacity:\n                self._data.popitem(last=False)  # last=False pops from the front (LRU)\n\n    def __repr__(self) -> str:\n        \"\"\"Show cache contents from LRU (left) to MRU (right).\"\"\"\n        return f\"LRUCache({self.capacity}, {dict(self._data)})\"\n\n\n# --- Small usage example ---\nif __name__ == \"__main__\":\n    cache = LRUCache(2)\n\n    cache.put(1, \"a\")          # cache: {1: 'a'}\n    cache.put(2, \"b\")          # cache: {1: 'a', 2: 'b'}\n    print(c",
+      "reasoning_chars": 0,
+      "content_chars": 2069,
+      "tool_calls": [],
+      "ttft_s": 0.24695450700073707,
+      "content_ttft_s": 0.24695450700073707,
+      "reasoning_ttft_s": null,
+      "wall_s": 5.919103000000177,
+      "output_event_count": 143,
+      "decode_tokens_per_second_approx": 90.13226632102696,
+      "cached_prompt_tokens": 0,
+      "uncached_prompt_tokens": 35,
+      "prompt_tokens_per_ttft_approx": 141.72650835603312,
+      "uncached_tokens_per_ttft_approx": 141.72650835603312,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "label": "sequential_prose_1",
+      "group": "prose",
+      "max_tokens": 512,
+      "usage": {
+        "prompt_tokens": 19,
+        "completion_tokens": 512,
+        "total_tokens": 531,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "finish_reason": "length",
+      "done": true,
+      "content": "# How a Refrigerator Moves Heat: A Detailed Explanation\n\n## The Big Surprise: Refrigerators Don't \"Make Cold\"\n\nHere's the counterintuitive idea that makes refrigerators fascinating: **cold isn't a thing you can create** — it's just the absence of heat. A refrigerator doesn't pump \"cold\" into your food. Instead, it **grabs heat from inside the fridge and dumps it outside** (into your kitchen). That's why the back of your fridge feels warm — that's the heat it just removed from your food!\n\nThis works because of a fundamental rule of physics: **heat naturally flows from hot to cold**. A refrigerator is a machine that forces heat to flow the \"wrong way\" — from cold to hot — by doing work. Think of it like a water pump pushing water uphill: it takes energy, but it's possible.\n\n---\n\n## The Four Key Parts\n\nA refrigerator is a closed loop of fluid (called **refrigerant**) that cycles through four components:\n\n1. **Compressor** — a pump that squeezes the refrigerant gas\n2. **Condenser coils** — the warm coils on the back (or bottom) of the fridge\n3. **Expansion valve** — a narrow nozzle that lets pressure drop suddenly\n4. **Evaporator coils** — the cold coils inside the freezer/fridge compartment\n\n---\n\n## The Cycle, Step by Step\n\n### Step 1: Compress the gas (Compressor)\nThe refrigerant arrives as a low-pressure gas. The compressor squeezes it hard, packing the molecules together. **Squeezing a gas heats it up** — just like a bike pump gets warm when you inflate a tire. The refrigerant leaves the compressor as a **hot, high-pressure gas** (often over 70°C / 160°F).\n\n### Step 2: Release the heat (Condenser coils)\nThat hot gas flows through the coils on the back of the fridge. Since the gas is hotter than your kitchen air, **heat flows out of the refrigerant into the room**. As it loses heat, the refrigerant **condenses into a liquid** (like steam turning back into water). This is why the back of the fridge is warm — it's literally radiating the heat it stole from your food.\n\n### Step 3: Drop the pressure (Expansion valve)\nThe liquid refrigerant now passes through a tiny valve where the pressure drops dramatically. **When pressure drops, the liquid expands and its temperature plunges",
+      "reasoning_chars": 0,
+      "content_chars": 2211,
+      "tool_calls": [],
+      "ttft_s": 0.19944796099935047,
+      "content_ttft_s": 0.19944796099935047,
+      "reasoning_ttft_s": null,
+      "wall_s": 8.210235144999388,
+      "output_event_count": 224,
+      "decode_tokens_per_second_approx": 63.805252635965225,
+      "cached_prompt_tokens": 0,
+      "uncached_prompt_tokens": 19,
+      "prompt_tokens_per_ttft_approx": 95.26294430285941,
+      "uncached_tokens_per_ttft_approx": 95.26294430285941,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "label": "sequential_code_2",
+      "group": "code",
+      "max_tokens": 512,
+      "usage": {
+        "prompt_tokens": 35,
+        "completion_tokens": 512,
+        "total_tokens": 547,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "finish_reason": "length",
+      "done": true,
+      "content": "```python\nfrom collections import OrderedDict\n\n\nclass LRUCache:\n    \"\"\"A fixed-capacity Least Recently Used (LRU) cache.\n\n    Uses an OrderedDict to track insertion/access order. The most recently\n    used item is moved to the end; when capacity is exceeded, the least\n    recently used item (at the front) is evicted.\n    \"\"\"\n\n    def __init__(self, capacity: int):\n        \"\"\"Initialize the cache with a positive integer capacity.\"\"\"\n        if capacity <= 0:\n            raise ValueError(\"capacity must be a positive integer\")\n        self.capacity = capacity\n        # OrderedDict preserves insertion order; we treat the right end as MRU.\n        self._data: \"OrderedDict[object, object]\" = OrderedDict()\n\n    def get(self, key):\n        \"\"\"Return the value for `key`, or -1 if not present.\n\n        Accessing a key marks it as most recently used.\n        \"\"\"\n        if key not in self._data:\n            return -1\n        # Move to the end to mark as most recently used.\n        self._data.move_to_end(key)\n        return self._data[key]\n\n    def put(self, key, value) -> None:\n        \"\"\"Insert or update `key` with `value`.\n\n        If the key already exists, update its value and mark it as MRU.\n        If inserting a new key exceeds capacity, evict the LRU entry.\n        \"\"\"\n        if key in self._data:\n            # Update existing entry and refresh its recency.\n            self._data[key] = value\n            self._data.move_to_end(key)\n        else:\n            self._data[key] = value\n            # Evict the least recently used item if over capacity.\n            if len(self._data) > self.capacity:\n                self._data.popitem(last=False)  # last=False pops from the front (LRU)\n\n    def __repr__(self) -> str:\n        \"\"\"Show cache contents from LRU (left) to MRU (right).\"\"\"\n        return f\"LRUCache({self.capacity}, {dict(self._data)})\"\n\n\n# --- Small usage example ---\nif __name__ == \"__main__\":\n    cache = LRUCache(2)\n\n    cache.put(1, \"a\")          # cache: {1: 'a'}\n    cache.put(2, \"b\")          # cache: {1: 'a', 2: 'b'}\n    print(c",
+      "reasoning_chars": 0,
+      "content_chars": 2069,
+      "tool_calls": [],
+      "ttft_s": 0.22813722400042025,
+      "content_ttft_s": 0.22813722400042025,
+      "reasoning_ttft_s": null,
+      "wall_s": 5.870654611000646,
+      "output_event_count": 143,
+      "decode_tokens_per_second_approx": 90.56369287488272,
+      "cached_prompt_tokens": 0,
+      "uncached_prompt_tokens": 35,
+      "prompt_tokens_per_ttft_approx": 153.41643676673968,
+      "uncached_tokens_per_ttft_approx": 153.41643676673968,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "label": "sequential_prose_2",
+      "group": "prose",
+      "max_tokens": 512,
+      "usage": {
+        "prompt_tokens": 19,
+        "completion_tokens": 512,
+        "total_tokens": 531,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "finish_reason": "length",
+      "done": true,
+      "content": "# How a Refrigerator Moves Heat: A Detailed Explanation\n\n## The Big Surprise: Refrigerators Don't \"Make Cold\"\n\nHere's the counterintuitive idea that makes refrigerators fascinating: **cold isn't a thing you can create** — it's just the absence of heat. A refrigerator doesn't pump \"cold\" into your food. Instead, it **grabs heat from inside the fridge and dumps it outside** (into your kitchen). That's why the back of your fridge feels warm — that's the heat it just removed from your food!\n\nThis works because of a fundamental rule of physics: **heat naturally flows from hot to cold**. A refrigerator is a machine that forces heat to flow the \"wrong way\" — from cold to hot — by doing work. Think of it like a water pump pushing water uphill: it takes energy, but it's possible.\n\n---\n\n## The Four Key Parts\n\nA refrigerator is a closed loop of fluid (called **refrigerant**) that cycles through four components:\n\n1. **Compressor** — a pump that squeezes the refrigerant gas\n2. **Condenser coils** — the warm coils on the back (or bottom) of the fridge\n3. **Expansion valve** — a narrow nozzle that lets pressure drop suddenly\n4. **Evaporator coils** — the cold coils inside the freezer/fridge compartment\n\n---\n\n## The Cycle, Step by Step\n\n### Step 1: Compress the gas (Compressor)\nThe refrigerant arrives as a low-pressure gas. The compressor squeezes it hard, packing the molecules together. **Squeezing a gas heats it up** — just like a bike pump gets warm when you inflate a tire. The refrigerant leaves the compressor as a **hot, high-pressure gas** (often over 70°C / 160°F).\n\n### Step 2: Release the heat (Condenser coils)\nThat hot gas flows through the coils on the back of the fridge. Since the gas is hotter than your kitchen air, **heat flows out of the refrigerant into the room**. As it loses heat, the refrigerant **condenses into a liquid** (like steam turning back into water). This is why the back of the fridge is warm — it's literally radiating the heat it stole from your food.\n\n### Step 3: Drop the pressure (Expansion valve)\nThe liquid refrigerant now passes through a tiny valve where the pressure drops dramatically. **When pressure drops, the liquid expands and its temperature plunges",
+      "reasoning_chars": 0,
+      "content_chars": 2211,
+      "tool_calls": [],
+      "ttft_s": 0.18456290399990394,
+      "content_ttft_s": 0.18456290399990394,
+      "reasoning_ttft_s": null,
+      "wall_s": 8.131644090000009,
+      "output_event_count": 223,
+      "decode_tokens_per_second_approx": 64.30083819249707,
+      "cached_prompt_tokens": 0,
+      "uncached_prompt_tokens": 19,
+      "prompt_tokens_per_ttft_approx": 102.94593110655589,
+      "uncached_tokens_per_ttft_approx": 102.94593110655589,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "label": "sequential_code_3",
+      "group": "code",
+      "max_tokens": 512,
+      "usage": {
+        "prompt_tokens": 35,
+        "completion_tokens": 512,
+        "total_tokens": 547,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "finish_reason": "length",
+      "done": true,
+      "content": "```python\nfrom collections import OrderedDict\n\n\nclass LRUCache:\n    \"\"\"A fixed-capacity Least Recently Used (LRU) cache.\n\n    Uses an OrderedDict to track insertion/access order. The most recently\n    used item is moved to the end; when capacity is exceeded, the least\n    recently used item (at the front) is evicted.\n    \"\"\"\n\n    def __init__(self, capacity: int):\n        \"\"\"Initialize the cache with a positive integer capacity.\"\"\"\n        if capacity <= 0:\n            raise ValueError(\"capacity must be a positive integer\")\n        self.capacity = capacity\n        # OrderedDict preserves insertion order; we treat the right end as MRU.\n        self._data: \"OrderedDict[object, object]\" = OrderedDict()\n\n    def get(self, key):\n        \"\"\"Return the value for `key`, or -1 if not present.\n\n        Accessing a key marks it as most recently used.\n        \"\"\"\n        if key not in self._data:\n            return -1\n        # Move to the end to mark as most recently used.\n        self._data.move_to_end(key)\n        return self._data[key]\n\n    def put(self, key, value) -> None:\n        \"\"\"Insert or update `key` with `value`.\n\n        If the key already exists, update its value and mark it as MRU.\n        If inserting a new key exceeds capacity, evict the LRU entry.\n        \"\"\"\n        if key in self._data:\n            # Update existing entry and refresh its recency.\n            self._data[key] = value\n            self._data.move_to_end(key)\n        else:\n            self._data[key] = value\n            # Evict the least recently used item if over capacity.\n            if len(self._data) > self.capacity:\n                self._data.popitem(last=False)  # last=False pops from the front (LRU)\n\n    def __repr__(self) -> str:\n        \"\"\"Show cache contents from LRU (left) to MRU (right).\"\"\"\n        return f\"LRUCache({self.capacity}, {dict(self._data)})\"\n\n\n# --- Small usage example ---\nif __name__ == \"__main__\":\n    cache = LRUCache(2)\n\n    cache.put(1, \"a\")          # cache: {1: 'a'}\n    cache.put(2, \"b\")          # cache: {1: 'a', 2: 'b'}\n    print(c",
+      "reasoning_chars": 0,
+      "content_chars": 2069,
+      "tool_calls": [],
+      "ttft_s": 0.22826283799986413,
+      "content_ttft_s": 0.22826283799986413,
+      "reasoning_ttft_s": null,
+      "wall_s": 5.908276897000178,
+      "output_event_count": 143,
+      "decode_tokens_per_second_approx": 89.96656988040941,
+      "cached_prompt_tokens": 0,
+      "uncached_prompt_tokens": 35,
+      "prompt_tokens_per_ttft_approx": 153.33201105657344,
+      "uncached_tokens_per_ttft_approx": 153.33201105657344,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "label": "sequential_prose_3",
+      "group": "prose",
+      "max_tokens": 512,
+      "usage": {
+        "prompt_tokens": 19,
+        "completion_tokens": 512,
+        "total_tokens": 531,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "finish_reason": "length",
+      "done": true,
+      "content": "# How a Refrigerator Moves Heat: A Detailed Explanation\n\n## The Big Surprise: Refrigerators Don't \"Make Cold\"\n\nHere's the counterintuitive idea that makes refrigerators fascinating: **cold isn't a thing you can create** — it's just the absence of heat. A refrigerator doesn't pump \"cold\" into your food. Instead, it **grabs heat from inside the fridge and dumps it outside** (into your kitchen). That's why the back of your fridge feels warm — that's the heat it just removed from your food!\n\nThis works because of a fundamental rule of physics: **heat naturally flows from hot to cold**. A refrigerator is a machine that forces heat to flow the \"wrong way\" — from cold to hot — by doing work. Think of it like a water pump pushing water uphill: it takes energy, but it's possible.\n\n---\n\n## The Four Key Parts\n\nA refrigerator is a closed loop of fluid (called **refrigerant**) that cycles through four components:\n\n1. **Compressor** — a pump that squeezes the refrigerant gas\n2. **Condenser coils** — the warm coils on the back (or bottom) of the fridge\n3. **Expansion valve** — a narrow nozzle that lets pressure drop suddenly\n4. **Evaporator coils** — the cold coils inside the freezer/fridge compartment\n\n---\n\n## The Cycle, Step by Step\n\n### Step 1: Compress the gas (Compressor)\nThe refrigerant arrives as a low-pressure gas. The compressor squeezes it hard, packing the molecules together. **Squeezing a gas heats it up** — just like a bike pump gets warm when you inflate a tire. The refrigerant leaves the compressor as a **hot, high-pressure gas** (often over 70°C / 160°F).\n\n### Step 2: Release the heat (Condenser coils)\nThat hot gas flows through the coils on the back of the fridge. Since the gas is hotter than your kitchen air, **heat flows out of the refrigerant into the room**. As it loses heat, the refrigerant **condenses into a liquid** (like steam turning back into water). This is why the back of the fridge is warm — it's literally radiating the heat it stole from your food.\n\n### Step 3: Drop the pressure (Expansion valve)\nThe liquid refrigerant now passes through a tiny valve where the pressure drops dramatically. **When pressure drops, the liquid expands and its temperature plunges",
+      "reasoning_chars": 0,
+      "content_chars": 2211,
+      "tool_calls": [],
+      "ttft_s": 0.18683577599949786,
+      "content_ttft_s": 0.18683577599949786,
+      "reasoning_ttft_s": null,
+      "wall_s": 17.103879622999557,
+      "output_event_count": 224,
+      "decode_tokens_per_second_approx": 30.206289599337094,
+      "cached_prompt_tokens": 0,
+      "uncached_prompt_tokens": 19,
+      "prompt_tokens_per_ttft_approx": 101.69358570839807,
+      "uncached_tokens_per_ttft_approx": 101.69358570839807,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "label": "mixed_1",
+      "group": "mixed",
+      "max_tokens": 256,
+      "usage": {
+        "prompt_tokens": 35,
+        "completion_tokens": 256,
+        "total_tokens": 291,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "finish_reason": "length",
+      "done": true,
+      "content": "```python\nfrom collections import OrderedDict\n\n\nclass LRUCache:\n    \"\"\"A fixed-capacity Least Recently Used (LRU) cache.\n\n    Uses an OrderedDict to track insertion/access order. The most recently\n    used item is moved to the end; when capacity is exceeded, the least\n    recently used item (at the front) is evicted.\n    \"\"\"\n\n    def __init__(self, capacity: int):\n        \"\"\"Initialize the cache with a positive integer capacity.\"\"\"\n        if capacity <= 0:\n            raise ValueError(\"capacity must be a positive integer\")\n        self.capacity = capacity\n        # OrderedDict preserves insertion order; we treat the right end as MRU.\n        self._data: \"OrderedDict[object, object]\" = OrderedDict()\n\n    def get(self, key):\n        \"\"\"Return the value for `key`, or -1 if not present.\n\n        Accessing a key marks it as most recently used.\n        \"\"\"\n        if key not in self._data:\n            return -1\n        # Move to the end to mark as most recently used.\n        self._data.move_to_end(key)\n        return self._data[key]\n\n    def put(self, key, value) -> None:\n        \"\"\"Insert or update",
+      "reasoning_chars": 0,
+      "content_chars": 1111,
+      "tool_calls": [],
+      "ttft_s": 4.156015635999211,
+      "content_ttft_s": 4.156015635999211,
+      "reasoning_ttft_s": null,
+      "wall_s": 12.278664641999967,
+      "output_event_count": 73,
+      "decode_tokens_per_second_approx": 31.393838511845495,
+      "cached_prompt_tokens": 0,
+      "uncached_prompt_tokens": 35,
+      "prompt_tokens_per_ttft_approx": 8.421527507459707,
+      "uncached_tokens_per_ttft_approx": 8.421527507459707,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "label": "mixed_2",
+      "group": "mixed",
+      "max_tokens": 256,
+      "usage": {
+        "prompt_tokens": 19,
+        "completion_tokens": 256,
+        "total_tokens": 275,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "finish_reason": "length",
+      "done": true,
+      "content": "# How a Refrigerator Moves Heat: A Detailed Explanation\n\n## The Big Surprise: Refrigerators Don't \"Make Cold\"\n\nHere's the counterintuitive idea that makes refrigerators fascinating: **cold isn't a thing you can create** — it's just the absence of heat. A refrigerator doesn't pump \"cold\" into your food. Instead, it **grabs heat from inside the fridge and dumps it outside** (into your kitchen). That's why the back of your fridge feels warm — that's the heat it just removed from your food!\n\nThis works because of a fundamental rule of physics: **heat naturally flows from hot to cold**. A refrigerator is a machine that forces heat to flow the \"wrong way\" — from cold to hot — by doing work. Think of it like a water pump pushing water uphill: it takes energy, but it's possible.\n\n---\n\n## The Four Key Parts\n\nA refrigerator is a closed loop of fluid (called **refrigerant**) that cycles through four components:\n\n1. **Compressor** — a pump that squeezes the refrigerant gas\n2. **Condenser coils** — the warm coils on the back (or bottom) of the fridge\n3. **Expansion valve** — a",
+      "reasoning_chars": 0,
+      "content_chars": 1080,
+      "tool_calls": [],
+      "ttft_s": 4.14234526600012,
+      "content_ttft_s": 4.14234526600012,
+      "reasoning_ttft_s": null,
+      "wall_s": 16.999159083999984,
+      "output_event_count": 115,
+      "decode_tokens_per_second_approx": 19.83391375871555,
+      "cached_prompt_tokens": 0,
+      "uncached_prompt_tokens": 19,
+      "prompt_tokens_per_ttft_approx": 4.586773622167556,
+      "uncached_tokens_per_ttft_approx": 4.586773622167556,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "label": "mixed_3",
+      "group": "mixed",
+      "max_tokens": 256,
+      "usage": {
+        "prompt_tokens": 35,
+        "completion_tokens": 256,
+        "total_tokens": 291,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "finish_reason": "length",
+      "done": true,
+      "content": "```python\nfrom collections import OrderedDict\n\n\nclass LRUCache:\n    \"\"\"A fixed-capacity Least Recently Used (LRU) cache.\n\n    Uses an OrderedDict to track insertion/access order. The most recently\n    used item is moved to the end; when capacity is exceeded, the least\n    recently used item (at the front) is evicted.\n    \"\"\"\n\n    def __init__(self, capacity: int):\n        \"\"\"Initialize the cache with a positive integer capacity.\"\"\"\n        if capacity <= 0:\n            raise ValueError(\"capacity must be a positive integer\")\n        self.capacity = capacity\n        # OrderedDict preserves insertion order; we treat the right end as MRU.\n        self._data: \"OrderedDict[object, object]\" = OrderedDict()\n\n    def get(self, key):\n        \"\"\"Return the value for `key`, or -1 if not present.\n\n        Accessing a key marks it as most recently used.\n        \"\"\"\n        if key not in self._data:\n            return -1\n        # Move to the end to mark as most recently used.\n        self._data.move_to_end(key)\n        return self._data[key]\n\n    def put(self, key, value) -> None:\n        \"\"\"Insert or update",
+      "reasoning_chars": 0,
+      "content_chars": 1111,
+      "tool_calls": [],
+      "ttft_s": 4.142312466000476,
+      "content_ttft_s": 4.142312466000476,
+      "reasoning_ttft_s": null,
+      "wall_s": 12.265229022999847,
+      "output_event_count": 73,
+      "decode_tokens_per_second_approx": 31.392846573532108,
+      "cached_prompt_tokens": 0,
+      "uncached_prompt_tokens": 35,
+      "prompt_tokens_per_ttft_approx": 8.44938673440865,
+      "uncached_tokens_per_ttft_approx": 8.44938673440865,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "label": "mixed_4",
+      "group": "mixed",
+      "max_tokens": 256,
+      "usage": {
+        "prompt_tokens": 19,
+        "completion_tokens": 256,
+        "total_tokens": 275,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "finish_reason": "length",
+      "done": true,
+      "content": "# How a Refrigerator Moves Heat: A Detailed Explanation\n\n## The Big Surprise: Refrigerators Don't \"Make Cold\"\n\nHere's the counterintuitive idea that makes refrigerators fascinating: **cold isn't a thing you can create** — it's just the absence of heat. A refrigerator doesn't pump \"cold\" into your food. Instead, it **grabs heat from inside the fridge and dumps it outside** (into your kitchen). That's why the back of your fridge feels warm — that's the heat it just removed from your food!\n\nThis works because of a fundamental rule of physics: **heat naturally flows from hot to cold**. A refrigerator is a machine that forces heat to flow the \"wrong way\" — from cold to hot — by doing work. Think of it like a water pump pushing water uphill: it takes energy, but it's possible.\n\n---\n\n## The Four Key Parts\n\nA refrigerator is a closed loop of fluid (called **refrigerant**) that cycles through four components:\n\n1. **Compressor** — a pump that squeezes the refrigerant gas\n2. **Condenser coils** — the warm coils on the back (or bottom) of the fridge\n3. **Expansion valve** — a",
+      "reasoning_chars": 0,
+      "content_chars": 1080,
+      "tool_calls": [],
+      "ttft_s": 12.45350178299941,
+      "content_ttft_s": 12.45350178299941,
+      "reasoning_ttft_s": null,
+      "wall_s": 20.95542468900021,
+      "output_event_count": 114,
+      "decode_tokens_per_second_approx": 29.993348244598305,
+      "cached_prompt_tokens": 0,
+      "uncached_prompt_tokens": 19,
+      "prompt_tokens_per_ttft_approx": 1.5256752944731882,
+      "uncached_tokens_per_ttft_approx": 1.5256752944731882,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "label": "long_prefill_8k",
+      "group": "prefill",
+      "max_tokens": 16,
+      "usage": {
+        "prompt_tokens": 8204,
+        "completion_tokens": 2,
+        "total_tokens": 8206,
+        "prompt_tokens_details": {
+          "cached_tokens": 8192
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "finish_reason": "stop",
+      "done": true,
+      "content": "ok",
+      "reasoning_chars": 0,
+      "content_chars": 2,
+      "tool_calls": [],
+      "ttft_s": 0.2811762720002662,
+      "content_ttft_s": 0.2811762720002662,
+      "reasoning_ttft_s": null,
+      "wall_s": 0.2812337919995116,
+      "output_event_count": 1,
+      "decode_tokens_per_second_approx": null,
+      "cached_prompt_tokens": 8192,
+      "uncached_prompt_tokens": 12,
+      "prompt_tokens_per_ttft_approx": 29177.42646503341,
+      "uncached_tokens_per_ttft_approx": 42.677854410092756,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "label": "arithmetic",
+      "group": "correctness",
+      "max_tokens": 32,
+      "usage": {
+        "prompt_tokens": 18,
+        "completion_tokens": 2,
+        "total_tokens": 20,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "finish_reason": "stop",
+      "done": true,
+      "content": "391",
+      "reasoning_chars": 0,
+      "content_chars": 3,
+      "tool_calls": [],
+      "ttft_s": 0.1890194130000964,
+      "content_ttft_s": 0.1890194130000964,
+      "reasoning_ttft_s": null,
+      "wall_s": 0.18905755700052396,
+      "output_event_count": 1,
+      "decode_tokens_per_second_approx": null,
+      "cached_prompt_tokens": 0,
+      "uncached_prompt_tokens": 18,
+      "prompt_tokens_per_ttft_approx": 95.2283139298016,
+      "uncached_tokens_per_ttft_approx": 95.2283139298016,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "label": "forced_strict_tool",
+      "group": "correctness",
+      "max_tokens": 128,
+      "usage": {
+        "prompt_tokens": 320,
+        "completion_tokens": 77,
+        "total_tokens": 397,
+        "prompt_tokens_details": {
+          "cached_tokens": 304
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "finish_reason": "tool_calls",
+      "done": true,
+      "content": "",
+      "reasoning_chars": 0,
+      "content_chars": 0,
+      "tool_calls": [
+        {
+          "id": "call_b959096d10300083538691c8",
+          "name": "add_tags",
+          "arguments": "{\"doc_id\":42,\"tags\":[\"urgent\",\"finance\",\"q3\"]}"
+        }
+      ],
+      "ttft_s": 4.430735588999596,
+      "content_ttft_s": null,
+      "reasoning_ttft_s": null,
+      "wall_s": 4.430766932999177,
+      "output_event_count": 2,
+      "decode_tokens_per_second_approx": 8558558.781778518,
+      "cached_prompt_tokens": 304,
+      "uncached_prompt_tokens": 16,
+      "prompt_tokens_per_ttft_approx": 72.22277059242255,
+      "uncached_tokens_per_ttft_approx": 3.611138529621127,
+      "issues": [],
+      "ok": true
+    },
+    {
+      "label": "json_schema",
+      "group": "correctness",
+      "max_tokens": 128,
+      "usage": {
+        "prompt_tokens": 87,
+        "completion_tokens": 13,
+        "total_tokens": 100,
+        "prompt_tokens_details": {
+          "cached_tokens": 80
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "finish_reason": "stop",
+      "done": true,
+      "content": "{\"answer\": 391, \"unit\": \"items\"}",
+      "reasoning_chars": 0,
+      "content_chars": 32,
+      "tool_calls": [],
+      "ttft_s": 0.33783275299992965,
+      "content_ttft_s": 0.33783275299992965,
+      "reasoning_ttft_s": null,
+      "wall_s": 0.47959104499932437,
+      "output_event_count": 3,
+      "decode_tokens_per_second_approx": 84.68427989127021,
+      "cached_prompt_tokens": 80,
+      "uncached_prompt_tokens": 7,
+      "prompt_tokens_per_ttft_approx": 257.52387602281453,
+      "uncached_tokens_per_ttft_approx": 20.720311863904616,
+      "issues": [],
+      "ok": true
+    }
+  ],
+  "notes": [
+    "No warmups or retries; identical labels/prompts/order across runs.",
+    "Repeated prompts may be cached; cache counts are reported, never assumed zero.",
+    "TTFT is first content, reasoning, or tool delta, not role/usage events.",
+    "Decode rate is approximate: output events can contain multiple tokens.",
+    "Prefill rate includes HTTP/scheduling/first decode latency, not pure GPU prefill.",
+    "Long input is 8192 fixed words; actual prompt_tokens comes only from usage.",
+    "Failed requests may consume tokens without reporting usage; no retry.",
+    "Strict API tests check output, not proof of server-side constraint enforcement."
+  ],
+  "manifest": [
+    {
+      "label": "sequential_code_1",
+      "max_tokens": 512,
+      "prompt_sha256": "c06f31cc55521e6dee5dae5adcfeda28f4c55d51eebb76d9cbbc30fe7ec55245",
+      "prompt_chars": 148,
+      "prompt": "Write only Python code for an LRU cache using OrderedDict. Include get, put, and a small usage example. Include docstrings and explanatory comments.",
+      "extra": {}
+    },
+    {
+      "label": "sequential_prose_1",
+      "max_tokens": 512,
+      "prompt_sha256": "be61c56e074a89036e2f1f9e55bd6ee4698e09ee0b8608c3772fefa12bb0ae77",
+      "prompt_chars": 73,
+      "prompt": "Explain how a refrigerator moves heat, in detail, for a curious teenager.",
+      "extra": {}
+    },
+    {
+      "label": "sequential_code_2",
+      "max_tokens": 512,
+      "prompt_sha256": "c06f31cc55521e6dee5dae5adcfeda28f4c55d51eebb76d9cbbc30fe7ec55245",
+      "prompt_chars": 148,
+      "prompt": "Write only Python code for an LRU cache using OrderedDict. Include get, put, and a small usage example. Include docstrings and explanatory comments.",
+      "extra": {}
+    },
+    {
+      "label": "sequential_prose_2",
+      "max_tokens": 512,
+      "prompt_sha256": "be61c56e074a89036e2f1f9e55bd6ee4698e09ee0b8608c3772fefa12bb0ae77",
+      "prompt_chars": 73,
+      "prompt": "Explain how a refrigerator moves heat, in detail, for a curious teenager.",
+      "extra": {}
+    },
+    {
+      "label": "sequential_code_3",
+      "max_tokens": 512,
+      "prompt_sha256": "c06f31cc55521e6dee5dae5adcfeda28f4c55d51eebb76d9cbbc30fe7ec55245",
+      "prompt_chars": 148,
+      "prompt": "Write only Python code for an LRU cache using OrderedDict. Include get, put, and a small usage example. Include docstrings and explanatory comments.",
+      "extra": {}
+    },
+    {
+      "label": "sequential_prose_3",
+      "max_tokens": 512,
+      "prompt_sha256": "be61c56e074a89036e2f1f9e55bd6ee4698e09ee0b8608c3772fefa12bb0ae77",
+      "prompt_chars": 73,
+      "prompt": "Explain how a refrigerator moves heat, in detail, for a curious teenager.",
+      "extra": {}
+    },
+    {
+      "label": "mixed_1",
+      "max_tokens": 256,
+      "prompt_sha256": "c06f31cc55521e6dee5dae5adcfeda28f4c55d51eebb76d9cbbc30fe7ec55245",
+      "prompt_chars": 148,
+      "prompt": "Write only Python code for an LRU cache using OrderedDict. Include get, put, and a small usage example. Include docstrings and explanatory comments.",
+      "extra": {}
+    },
+    {
+      "label": "mixed_2",
+      "max_tokens": 256,
+      "prompt_sha256": "be61c56e074a89036e2f1f9e55bd6ee4698e09ee0b8608c3772fefa12bb0ae77",
+      "prompt_chars": 73,
+      "prompt": "Explain how a refrigerator moves heat, in detail, for a curious teenager.",
+      "extra": {}
+    },
+    {
+      "label": "mixed_3",
+      "max_tokens": 256,
+      "prompt_sha256": "c06f31cc55521e6dee5dae5adcfeda28f4c55d51eebb76d9cbbc30fe7ec55245",
+      "prompt_chars": 148,
+      "prompt": "Write only Python code for an LRU cache using OrderedDict. Include get, put, and a small usage example. Include docstrings and explanatory comments.",
+      "extra": {}
+    },
+    {
+      "label": "mixed_4",
+      "max_tokens": 256,
+      "prompt_sha256": "be61c56e074a89036e2f1f9e55bd6ee4698e09ee0b8608c3772fefa12bb0ae77",
+      "prompt_chars": 73,
+      "prompt": "Explain how a refrigerator moves heat, in detail, for a curious teenager.",
+      "extra": {}
+    },
+    {
+      "label": "long_prefill_8k",
+      "max_tokens": 16,
+      "prompt_sha256": "5e9265c4c7eace1a86db4f4817bf8f2888acf9ff8da83ededde03fdcc209bd78",
+      "prompt_chars": 43961,
+      "prompt": "the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end law car city name team idea body back face level door health art war party change air voice paper the time year people way day man thing woman life child world school state family group country hand part place case week work number night home water room mother area money story fact month lot right book eye job word side kind head house friend power hour game line end\n\nReply with only the word: ok",
+      "extra": {}
+    },
+    {
+      "label": "arithmetic",
+      "max_tokens": 32,
+      "prompt_sha256": "2f25ab6d6b8a7c9e0df56749a4d6ed95c410e92c0bb8d78b442891daf082012c",
+      "prompt_chars": 44,
+      "prompt": "What is 17 * 23? Reply with only the number.",
+      "extra": {}
+    },
+    {
+      "label": "forced_strict_tool",
+      "max_tokens": 128,
+      "prompt_sha256": "cbb97634395d58b42305f5b54a1db62ee13b6dfc8ca8d84c520a72922fa435cd",
+      "prompt_chars": 65,
+      "prompt": "Tag document 42 with 'urgent', 'finance' and 'q3' using add_tags.",
+      "extra": {
+        "tools": [
+          {
+            "type": "function",
+            "function": {
+              "name": "add_tags",
+              "description": "Attach tags to a document.",
+              "strict": true,
+              "parameters": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "doc_id": {
+                    "type": "integer"
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "doc_id",
+                  "tags"
+                ]
+              }
+            }
+          }
+        ],
+        "tool_choice": {
+          "type": "function",
+          "function": {
+            "name": "add_tags"
+          }
+        },
+        "parallel_tool_calls": false
+      }
+    },
+    {
+      "label": "json_schema",
+      "max_tokens": 128,
+      "prompt_sha256": "0b4b250d654c897c7e69ca4510bbef507d5f3a1ecb5eabb70dee1f20a441af12",
+      "prompt_chars": 68,
+      "prompt": "Return an object with answer equal to 391 and unit equal to \"items\".",
+      "extra": {
+        "response_format": {
+          "type": "json_schema",
+          "json_schema": {
+            "name": "item_count",
+            "strict": true,
+            "schema": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "answer": {
+                  "type": "integer"
+                },
+                "unit": {
+                  "type": "string",
+                  "enum": [
+                    "items"
+                  ]
+                }
+              },
+              "required": [
+                "answer",
+                "unit"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "health_before": {
+    "ok": true,
+    "body": {
+      "status": "ok",
+      "model": "DeepSeek-V4.1-Flash-1017",
+      "model_ids": [
+        "DeepSeek-V4.1-Flash-1017"
+      ],
+      "max_batch_size": 4,
+      "warming": false,
+      "memory": {
+        "active": 109203152760,
+        "cache": 0,
+        "peak": 111876200056
+      },
+      "live": {
+        "connections": 0,
+        "waiting": 0,
+        "decode_tokens_per_second": 47.0,
+        "prefill_tokens_per_second": 30.1
+      },
+      "version": "1.1.8",
+      "backend": "cuda"
+    },
+    "wall_s": 0.0018700729997362942
+  },
+  "refused_busy_server": false,
+  "mixed_batch": {
+    "wall_s": 21.068920405000426,
+    "simultaneous_requests": 4,
+    "completion_tokens_per_second": 48.60239539169588,
+    "launch": "four processes released by one shared event"
+  },
+  "health_after": {
+    "ok": true,
+    "body": {
+      "status": "ok",
+      "model": "DeepSeek-V4.1-Flash-1017",
+      "model_ids": [
+        "DeepSeek-V4.1-Flash-1017"
+      ],
+      "max_batch_size": 4,
+      "warming": false,
+      "memory": {
+        "active": 109203222172,
+        "cache": 0,
+        "peak": 111876269468
+      },
+      "live": {
+        "connections": 1,
+        "waiting": 0,
+        "decode_tokens_per_second": 98.0,
+        "prefill_tokens_per_second": 30.5
+      },
+      "version": "1.1.8",
+      "backend": "cuda"
+    },
+    "wall_s": 0.0016421549998995033
+  },
+  "summary": {
+    "code": {
+      "requests": 3,
+      "passed": 3,
+      "median_ttft_s": 0.22826283799986413,
+      "median_content_ttft_s": 0.22826283799986413,
+      "median_wall_s": 5.908276897000178,
+      "median_decode_tokens_per_second_approx": 90.13226632102696
+    },
+    "prose": {
+      "requests": 3,
+      "passed": 3,
+      "median_ttft_s": 0.18683577599949786,
+      "median_content_ttft_s": 0.18683577599949786,
+      "median_wall_s": 8.210235144999388,
+      "median_decode_tokens_per_second_approx": 63.805252635965225
+    },
+    "mixed": {
+      "requests": 4,
+      "passed": 4,
+      "median_ttft_s": 4.1491804509996655,
+      "median_content_ttft_s": 4.1491804509996655,
+      "median_wall_s": 14.638911862999976,
+      "median_decode_tokens_per_second_approx": 30.693097409065206
+    },
+    "prefill": {
+      "requests": 1,
+      "passed": 1,
+      "median_ttft_s": 0.2811762720002662,
+      "median_content_ttft_s": 0.2811762720002662,
+      "median_wall_s": 0.2812337919995116,
+      "median_decode_tokens_per_second_approx": null
+    },
+    "correctness": {
+      "requests": 3,
+      "passed": 3,
+      "median_ttft_s": 0.33783275299992965,
+      "median_content_ttft_s": 0.263426083000013,
+      "median_wall_s": 0.47959104499932437,
+      "median_decode_tokens_per_second_approx": 4279321.733029204
+    }
+  },
+  "reported_completion_tokens": 4190,
+  "reported_prompt_tokens": 8899,
+  "usage_complete_requests": 14,
+  "elapsed_s": 78.3644214169999
+}

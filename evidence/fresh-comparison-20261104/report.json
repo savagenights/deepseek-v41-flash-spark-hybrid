@@ -1,0 +1,166 @@
+{
+  "started": 1793825214.435251,
+  "stage": "/home/cell/spark-hybrid-20261031/results/fresh-comparison-20261104-124654",
+  "stacks": {
+    "hybrid": {
+      "warmup": {
+        "code": 101.74350005172933,
+        "prose": 74.18808123271111,
+        "aggregate": 173.61731480760062,
+        "file": "hybrid-warmup.json",
+        "returncode": 0,
+        "passed": 14,
+        "total": 14,
+        "failures": []
+      },
+      "runs": [
+        {
+          "code": 101.77112408736961,
+          "prose": 74.15992344403158,
+          "aggregate": 172.72831530613377,
+          "file": "hybrid-run-1.json",
+          "returncode": 0,
+          "passed": 14,
+          "total": 14,
+          "failures": []
+        },
+        {
+          "code": 101.90733619366124,
+          "prose": 74.12332570115849,
+          "aggregate": 173.01464325756785,
+          "file": "hybrid-run-2.json",
+          "returncode": 0,
+          "passed": 14,
+          "total": 14,
+          "failures": []
+        }
+      ],
+      "median": {
+        "code": 101.83923014051543,
+        "prose": 74.14162457259503,
+        "aggregate": 172.8714792818508
+      }
+    },
+    "mia": {
+      "warmup": {
+        "code": 100.57182654816121,
+        "prose": 73.17218304234076,
+        "aggregate": 170.4815099662734,
+        "file": "mia-warmup.json",
+        "returncode": 1,
+        "passed": 13,
+        "total": 14,
+        "failures": [
+          "json_schema"
+        ]
+      },
+      "runs": [
+        {
+          "code": 100.7192283224541,
+          "prose": 73.42217550577922,
+          "aggregate": 170.91784394085747,
+          "file": "mia-run-1.json",
+          "returncode": 1,
+          "passed": 13,
+          "total": 14,
+          "failures": [
+            "json_schema"
+          ]
+        },
+        {
+          "code": 100.6226928026311,
+          "prose": 73.29978575706512,
+          "aggregate": 170.84733635809494,
+          "file": "mia-run-2.json",
+          "returncode": 1,
+          "passed": 13,
+          "total": 14,
+          "failures": [
+            "json_schema"
+          ]
+        }
+      ],
+      "median": {
+        "code": 100.6709605625426,
+        "prose": 73.36098063142217,
+        "aggregate": 170.8825901494762
+      }
+    },
+    "jay": {
+      "warmup": {
+        "code": 90.03043610501392,
+        "prose": 64.11846959479503,
+        "aggregate": 138.02607354045614,
+        "file": "jay-warmup.json",
+        "returncode": 0,
+        "passed": 14,
+        "total": 14,
+        "failures": []
+      },
+      "runs": [
+        {
+          "code": 90.0680983317458,
+          "prose": 64.1542811963966,
+          "aggregate": 120.55173027177351,
+          "file": "jay-run-1.json",
+          "returncode": 0,
+          "passed": 14,
+          "total": 14,
+          "failures": []
+        },
+        {
+          "code": 90.13226632102696,
+          "prose": 63.805252635965225,
+          "aggregate": 48.60239539169588,
+          "file": "jay-run-2.json",
+          "returncode": 0,
+          "passed": 14,
+          "total": 14,
+          "failures": []
+        }
+      ],
+      "median": {
+        "code": 90.10018232638637,
+        "prose": 63.97976691618091,
+        "aggregate": 84.5770628317347
+      }
+    },
+    "hybrid_final": {
+      "warmup": {
+        "code": 97.56215643270474,
+        "prose": 70.83080655925055,
+        "aggregate": 164.86623217848432,
+        "file": "hybrid-final-warmup.json",
+        "returncode": 0,
+        "passed": 14,
+        "total": 14,
+        "failures": []
+      },
+      "runs": [
+        {
+          "code": 97.30208872449754,
+          "prose": 70.81783937173263,
+          "aggregate": 167.78462017877948,
+          "file": "hybrid-final-run-1.json",
+          "returncode": 0,
+          "passed": 14,
+          "total": 14,
+          "failures": []
+        }
+      ],
+      "median": {
+        "code": 97.30208872449754,
+        "prose": 70.81783937173263,
+        "aggregate": 167.78462017877948
+      }
+    }
+  },
+  "method": "One discarded full warmup plus two measured runs per stack, same benchmark file, prompts and seeds; final hybrid repeat for drift.",
+  "benchmark_sha256": "d8a8b6584e74b01c90a22d9a2175a87be9dc4bf4296396396404ec8237bedd1d",
+  "hybrid_identity": "sha256:5a3f8e3b99407f8e91b10d6e3a351058d0a7e08e3d8b7b4da1f1e94df5f80259|tensorfold-dsv41:hybrid-grammar-487088aeda6f|527c3dd1fd55556b7428a872e1c809ff4b92635820502c9024d94c9bff7d627d",
+  "mia_identity": "sha256:6cb82ac552985a60b88582c146ad2a78ebdf29f0207b720069ffc06049d37b10|tensorfold-dsv41:exl3-tp2-8eb5919ff0a4|2b6f964d7422351f9d9e1cfea6262d521155e218d7930fcd54fe697cf737d409",
+  "jay_identity": "sha256:c3d5f1c55b8e43d65e6bcba5b60d0813f9c3b36138b8d0395f78631cb7205c33|tensorfold-dsv41:jay-ab-20261031|1ba82e3b8cbd0b81157f719ff0eca75fed499b27fd608b207c57f366af78a574",
+  "hybrid_restored": true,
+  "hybrid_final_identity": "sha256:5a3f8e3b99407f8e91b10d6e3a351058d0a7e08e3d8b7b4da1f1e94df5f80259|tensorfold-dsv41:hybrid-grammar-487088aeda6f|9daa6e8fa0b010d7410ece856482fd4d04181c16b5e34c0ae35200fa20b344cd",
+  "finished": 1793826186.9196012
+}

@@ -12,7 +12,37 @@ No new base model. No new kernels. No measurable quality or throughput change fo
 ordinary requests in matched testing. The goal was to add structured decoding
 without taking the measured slowdown of a wholesale engine replacement.
 
-## Measured result (same weights, same prompts, same machine)
+## Fresh three-stack comparison (2026-11-04)
+
+Same two Sparks, benchmark script, prompts, seeds and requested concurrency.
+Each stack received one discarded full warm-up plus two measured runs; values
+below are medians of those two runs. Stack-specific weights and serving settings
+were retained, so this compares recipes, not engine code in isolation.
+
+| Recipe | Code tok/s | Prose tok/s | Four-request aggregate tok/s | Benchmark checks | Historical quality score* |
+|---|---:|---:|---:|---:|---:|
+| Original installed Mia | 100.67 | 73.36 | 170.88 (170.85–170.92) | 13/14 | 97.2%; 766/807 |
+| Jay standalone | 90.10 | 63.98 | 84.58 (48.60–120.55) | 14/14 | 96.7%; 763/807 |
+| Hybrid | 101.84 | 74.14 | 172.87 (172.73–173.01) | 14/14 | 97.2%; 766/807 |
+
+**Caveats matter:** Jay's aggregate result was unstable; its discarded warm-up
+reached 138.03 tok/s. Do not treat 84.58 as a stable capacity estimate. A closing
+hybrid repeat measured 97.30 code, 70.82 prose and 167.78 aggregate tok/s, showing
+approximately 3–4.5% drift across the session. The opening hybrid's ~1.1% advantage
+over Mia is smaller than that drift: **speed preserved, not a proven speedup**.
+Mia's sole failed check was `json_schema`; all ordinary checks passed.
+
+*Quality scores are the earlier persisted 807-item runs, **not fresh quality
+reruns** during this TPS session. All three had zero request errors. The displayed
+score is category-averaged, not raw correct / 807. Mia and hybrid had identical
+paired pass/fail outcomes; Jay's raw total was three lower. These benchmark results
+do not establish universal model superiority.
+
+Raw runs, discarded warm-ups, runtime image identities, final drift check and
+historical quality provenance: [evidence/fresh-comparison-20261104](evidence/fresh-comparison-20261104).
+The qualified hybrid was restored and left enabled after testing.
+
+## Earlier matched result (same weights, same prompts, same machine)
 
 | Measurement | Original | Hybrid | Delta |
 |---|---:|---:|---:|

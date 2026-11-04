@@ -1,0 +1,260 @@
+{
+  "mia": {
+    "bench_id": "273d9930-c819-4c52-afd4-0e2848cd26d5",
+    "completed_at": 1793443227183,
+    "overall_pct": 97.2,
+    "passed": 766,
+    "total": 807,
+    "errors": 0,
+    "categories": {
+      "qa": {
+        "passed": 141,
+        "total": 150,
+        "scored": 150,
+        "pct": 94,
+        "errors": 0,
+        "hitMaxTokens": 0,
+        "meanCompletionTokens": 5
+      },
+      "reason": {
+        "passed": 40,
+        "total": 40,
+        "scored": 40,
+        "pct": 100,
+        "errors": 0,
+        "hitMaxTokens": 0,
+        "meanCompletionTokens": 519
+      },
+      "arith": {
+        "passed": 40,
+        "total": 40,
+        "scored": 40,
+        "pct": 100,
+        "errors": 0,
+        "hitMaxTokens": 0,
+        "meanCompletionTokens": 328
+      },
+      "track": {
+        "passed": 40,
+        "total": 40,
+        "scored": 40,
+        "pct": 100,
+        "errors": 0,
+        "hitMaxTokens": 0,
+        "meanCompletionTokens": 993
+      },
+      "gsm8k": {
+        "passed": 193,
+        "total": 200,
+        "scored": 200,
+        "pct": 96.5,
+        "errors": 0,
+        "hitMaxTokens": 1,
+        "meanCompletionTokens": 366
+      },
+      "mmlu": {
+        "passed": 262,
+        "total": 285,
+        "scored": 285,
+        "pct": 91.9,
+        "errors": 0,
+        "hitMaxTokens": 0,
+        "meanCompletionTokens": 65
+      },
+      "follow": {
+        "passed": 38,
+        "total": 40,
+        "scored": 40,
+        "pct": 95,
+        "errors": 0,
+        "hitMaxTokens": 0,
+        "meanCompletionTokens": 145
+      },
+      "long": {
+        "passed": 12,
+        "total": 12,
+        "scored": 12,
+        "pct": 100,
+        "errors": 0,
+        "hitMaxTokens": 0,
+        "keysFound": 192,
+        "keysTotal": 192,
+        "stale": 0,
+        "meanCompletionTokens": 115
+      }
+    },
+    "note": "Historical quality run, not rerun during fresh TPS comparison"
+  },
+  "jay": {
+    "bench_id": "19000a6d-7767-41e4-acc6-390dd64d1588",
+    "completed_at": 1793476896386,
+    "overall_pct": 96.7,
+    "passed": 763,
+    "total": 807,
+    "errors": 0,
+    "categories": {
+      "qa": {
+        "passed": 140,
+        "total": 150,
+        "scored": 150,
+        "pct": 93.3,
+        "errors": 0,
+        "hitMaxTokens": 4,
+        "meanCompletionTokens": 6
+      },
+      "reason": {
+        "passed": 40,
+        "total": 40,
+        "scored": 40,
+        "pct": 100,
+        "errors": 0,
+        "hitMaxTokens": 0,
+        "meanCompletionTokens": 491
+      },
+      "arith": {
+        "passed": 40,
+        "total": 40,
+        "scored": 40,
+        "pct": 100,
+        "errors": 0,
+        "hitMaxTokens": 0,
+        "meanCompletionTokens": 354
+      },
+      "track": {
+        "passed": 39,
+        "total": 40,
+        "scored": 40,
+        "pct": 97.5,
+        "errors": 0,
+        "hitMaxTokens": 0,
+        "meanCompletionTokens": 990
+      },
+      "gsm8k": {
+        "passed": 190,
+        "total": 200,
+        "scored": 200,
+        "pct": 95,
+        "errors": 0,
+        "hitMaxTokens": 0,
+        "meanCompletionTokens": 296
+      },
+      "mmlu": {
+        "passed": 264,
+        "total": 285,
+        "scored": 285,
+        "pct": 92.6,
+        "errors": 0,
+        "hitMaxTokens": 0,
+        "meanCompletionTokens": 69
+      },
+      "follow": {
+        "passed": 38,
+        "total": 40,
+        "scored": 40,
+        "pct": 95,
+        "errors": 0,
+        "hitMaxTokens": 0,
+        "meanCompletionTokens": 145
+      },
+      "long": {
+        "passed": 12,
+        "total": 12,
+        "scored": 12,
+        "pct": 100,
+        "errors": 0,
+        "hitMaxTokens": 0,
+        "keysFound": 192,
+        "keysTotal": 192,
+        "stale": 0,
+        "meanCompletionTokens": 115
+      }
+    },
+    "note": "Historical quality run, not rerun during fresh TPS comparison"
+  },
+  "hybrid": {
+    "bench_id": "d89c3476-cbd7-4006-9bcb-cc988ace3d0a",
+    "completed_at": 1793489132404,
+    "overall_pct": 97.2,
+    "passed": 766,
+    "total": 807,
+    "errors": 0,
+    "categories": {
+      "qa": {
+        "passed": 141,
+        "total": 150,
+        "scored": 150,
+        "pct": 94,
+        "errors": 0,
+        "hitMaxTokens": 0,
+        "meanCompletionTokens": 5
+      },
+      "reason": {
+        "passed": 40,
+        "total": 40,
+        "scored": 40,
+        "pct": 100,
+        "errors": 0,
+        "hitMaxTokens": 0,
+        "meanCompletionTokens": 519
+      },
+      "arith": {
+        "passed": 40,
+        "total": 40,
+        "scored": 40,
+        "pct": 100,
+        "errors": 0,
+        "hitMaxTokens": 0,
+        "meanCompletionTokens": 328
+      },
+      "track": {
+        "passed": 40,
+        "total": 40,
+        "scored": 40,
+        "pct": 100,
+        "errors": 0,
+        "hitMaxTokens": 0,
+        "meanCompletionTokens": 993
+      },
+      "gsm8k": {
+        "passed": 193,
+        "total": 200,
+        "scored": 200,
+        "pct": 96.5,
+        "errors": 0,
+        "hitMaxTokens": 1,
+        "meanCompletionTokens": 366
+      },
+      "mmlu": {
+        "passed": 262,
+        "total": 285,
+        "scored": 285,
+        "pct": 91.9,
+        "errors": 0,
+        "hitMaxTokens": 0,
+        "meanCompletionTokens": 65
+      },
+      "follow": {
+        "passed": 38,
+        "total": 40,
+        "scored": 40,
+        "pct": 95,
+        "errors": 0,
+        "hitMaxTokens": 0,
+        "meanCompletionTokens": 145
+      },
+      "long": {
+        "passed": 12,
+        "total": 12,
+        "scored": 12,
+        "pct": 100,
+        "errors": 0,
+        "hitMaxTokens": 0,
+        "keysFound": 192,
+        "keysTotal": 192,
+        "stale": 0,
+        "meanCompletionTokens": 115
+      }
+    },
+    "note": "Historical quality run, not rerun during fresh TPS comparison"
+  }
+}

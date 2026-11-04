@@ -1,12 +1,15 @@
 # How these numbers were produced
 
-The rule for this project: only compare runs that share weights, prompts, machine,
-concurrency and scoring. Anything else is a vibe, not a measurement.
+For an engine-only comparison, hold weights, prompts, machine, concurrency and
+scoring fixed. Recipe-level comparisons deliberately retain each recipe's weights
+and policy, so they cannot isolate the engine as the cause of a difference.
 
 ## Speed
 
-Same 807-item workload, same prompts, same seeds, same 4-way concurrency, run against
-the original deployment and the candidate on the same two Sparks.
+The bounded 14-check `ab_benchmark.py` harness measures speed, including three
+code requests, three prose requests and a four-request simultaneous batch. Same
+prompts, seeds and harness were used on the same two Sparks. This speed harness
+is separate from the 807-item SparkDash quality suite.
 
 | Run | Code tok/s | Prose tok/s | Aggregate tok/s |
 |---|---:|---:|---:|
@@ -18,6 +21,35 @@ Ratios recorded by the acceptance gate: code 0.9983, prose 0.9977, mixed 1.0036.
 Post-recovery: -0.26%, -0.60%, -0.21%.
 
 Cold ~8K TTFT: 3.817 s original vs 3.822 s hybrid.
+
+### Fresh three-recipe rerun, 2026-11-04
+
+Order: hybrid, original installed Mia, Jay standalone, then hybrid again.
+Each stack received one discarded full-harness warm-up and two measured runs;
+the closing hybrid check received one warm-up and one measured run. The script
+SHA-256 and exact image identities are in `evidence/fresh-comparison-20261104/report.json`.
+Recipe weights/settings were retained. No engine, checkpoint or safety-floor changes
+were made to improve a recipe's result. Raw failures and warm-ups are retained.
+
+| Stack | Median code | Median prose | Median aggregate | Aggregate measured range |
+|---|---:|---:|---:|---:|
+| Mia | 100.67 | 73.36 | 170.88 | 170.85–170.92 |
+| Jay | 90.10 | 63.98 | 84.58 | 48.60–120.55 |
+| Hybrid opening | 101.84 | 74.14 | 172.87 | 172.73–173.01 |
+| Hybrid closing (one run) | 97.30 | 70.82 | 167.78 | — |
+
+Jay's warm-up aggregate was 138.03 tok/s. Measured single-stream rates were stable,
+but concurrent TTFT/wall times varied sharply; the cause was not isolated. Report
+this as unstable concurrency, not a robust 84.58 tok/s capacity ceiling. The closing
+hybrid check shows session drift; the ~1.1% opening hybrid/Mia difference is within
+that drift and is not a proven speedup. No temperature/power-state equivalence or
+randomized/counterbalanced experimental order is claimed.
+
+Mia passed 13/14 (`json_schema` unsupported); Jay and hybrid passed 14/14 each.
+Fresh full quality was not rerun: historical displayed scores are Mia 97.2%
+(766/807), Jay 96.7% (763/807), hybrid 97.2% (766/807), all zero errors. Dates,
+category scores and benchmark IDs are preserved in `historical-quality-summary.json`.
+Hybrid was restored active/enabled; original settings checksums remained unchanged.
 
 ### One honest correction
 
