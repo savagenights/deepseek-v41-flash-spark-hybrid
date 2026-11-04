@@ -12,91 +12,36 @@ No new base model. No new kernels. No measurable quality or throughput change fo
 ordinary requests in matched testing. The goal was to add structured decoding
 without taking the measured slowdown of a wholesale engine replacement.
 
-## Fresh three-stack comparison (2026-11-04)
+## Performance (2026-11-04)
 
-Same two Sparks, benchmark script, prompts, seeds and requested concurrency.
-Each stack received one discarded full warm-up plus two measured runs; values
-below are medians of those two runs. Stack-specific weights and serving settings
-were retained, so this compares recipes, not engine code in isolation.
+Measured on the same two DGX Sparks with the same benchmark, prompts, seeds and
+requested concurrency. Each recipe retained its weights and settings. Results
+are medians of two runs after one discarded warm-up.
 
-| Recipe | Code tok/s | Prose tok/s | Four-request aggregate tok/s | Benchmark checks | Historical quality score* |
+| Recipe | Code tok/s | Prose tok/s | Four-request aggregate tok/s | API benchmark | Quality score* |
 |---|---:|---:|---:|---:|---:|
-| Original installed Mia | 100.67 | 73.36 | 170.88 (170.85–170.92) | 13/14 | 97.2%; 766/807 |
-| Jay standalone | 90.10 | 63.98 | 84.58 (48.60–120.55) | 14/14 | 96.7%; 763/807 |
-| Hybrid | 101.84 | 74.14 | 172.87 (172.73–173.01) | 14/14 | 97.2%; 766/807 |
+| [Mia](https://github.com/MiaAI-Lab/DeepSeek-v4.1-Flash-1017-2x-DGX-Sparks) | 100.67 | 73.36 | 170.88 | 13/14 | 97.2%; 766/807 |
+| [Jay](https://github.com/jayleaton/deepseek-v41-tensorfold-spark) | 90.10 | 63.98 | 84.58† | 14/14 | 96.7%; 763/807 |
+| **Hybrid** | **101.84** | **74.14** | **172.87** | **14/14** | **97.2%; 766/807** |
 
-**Caveats matter:** Jay's aggregate result was unstable; its discarded warm-up
-reached 138.03 tok/s. Do not treat 84.58 as a stable capacity estimate. A closing
-hybrid repeat measured 97.30 code, 70.82 prose and 167.78 aggregate tok/s, showing
-approximately 3–4.5% drift across the session. The opening hybrid's ~1.1% advantage
-over Mia is smaller than that drift: **speed preserved, not a proven speedup**.
-Mia's sole failed check was `json_schema`; all ordinary checks passed.
+- **Speed preserved, not a proven speedup over Mia:** the ~1.1% difference is
+  smaller than observed session drift. A closing hybrid check measured
+  97.30 / 70.82 / 167.78 tok/s (code / prose / aggregate).
+- **† Jay's concurrent throughput was unstable:** measured runs were 48.60 and
+  120.55 tok/s. The median is not a reliable capacity estimate.
+- Mia's sole failed API benchmark check was JSON Schema; ordinary checks passed.
+- *Quality uses the latest available 807-item runs, collected separately from
+  this TPS comparison. Displayed percentages are category averages. All three
+  had zero request errors; Mia and hybrid had identical paired pass/fail results.
+- These are ordinary decoding rates, **not constrained-output throughput**.
 
-*Quality scores are the earlier persisted 807-item runs, **not fresh quality
-reruns** during this TPS session. All three had zero request errors. The displayed
-score is category-averaged, not raw correct / 807. Mia and hybrid had identical
-paired pass/fail outcomes; Jay's raw total was three lower. These benchmark results
-do not establish universal model superiority.
+The hybrid also passed all 12 long-context recall checks through 256K and starts
+model serving automatically after reboot: observed ready in **45.76 seconds**
+after head boot, with zero supervisor retries.
 
-Raw runs, discarded warm-ups, runtime image identities, final drift check and
-historical quality provenance: [evidence/fresh-comparison-20261104](evidence/fresh-comparison-20261104).
-The qualified hybrid was restored and left enabled after testing.
-
-## Earlier matched result (same weights, same prompts, same machine)
-
-| Measurement | Original | Hybrid | Delta |
-|---|---:|---:|---:|
-| Code decode | 91.06 tok/s | 90.83 tok/s | -0.26% |
-| Prose decode | 66.30 tok/s | 65.90 tok/s | -0.60% |
-| 4-request aggregate | 154.78 tok/s | 154.45 tok/s | -0.21% |
-
-Across every matched run the spread was **-0.60% to +0.36%**. Cold ~8K TTFT was
-3.817 s vs 3.822 s.
-
-### How the standalone recipes compared
-
-These are measurements of the tested, pinned versions on this pair of Sparks,
-not claims about every configuration or future release:
-
-| Tested stack | Result relative to the original installed Mia deployment |
-|---|---|
-| [Original Mia recipe](https://github.com/MiaAI-Lab/DeepSeek-v4.1-Flash-1017-2x-DGX-Sparks) | Baseline in the table above |
-| [Jay's complete recipe](https://github.com/jayleaton/deepseek-v41-tensorfold-spark) | Approximately 12% slower warmed prose and 22% lower concurrent throughput |
-| Newer engine with original Mia weights | Approximately 12% slower code, 22% slower prose, 29% lower concurrent throughput |
-| This hybrid | Matched ordinary throughput within 0.6% of original Mia; adds constrained decoding |
-
-The Jay recipe and the newer-engine/original-weights experiment are **different
-experiments**. Neither is the deployed hybrid. All use the same base model;
-runtime, quantization and policy differences are not a model-intelligence upgrade.
-
-### Latest TPS rerun after reboot (2026-11-04)
-
-| Measurement | Earlier original Mia | Latest hybrid | Apparent difference |
-|---|---:|---:|---:|
-| Code decode | 91.06 tok/s | 102.14 tok/s | +12.2% |
-| Prose decode | 66.30 tok/s | 74.29 tok/s | +12.0% |
-| 4-request aggregate | 154.78 tok/s | 173.75 tok/s | +12.2% |
-
-**This is not evidence of a 12% hybrid speedup.** The original numbers were
-collected before reboot; neither standalone recipe was rerun alongside this
-latest test. The reason for the higher post-reboot operating speed has not been
-isolated. The matched comparison above remains the basis for the claim that
-ordinary speed was preserved. A fresh same-condition baseline is required to
-claim an improvement over either standalone recipe.
-
-The latest run passed 14/14 checks; median code/prose TTFT was 139/102 ms.
-These are ordinary decoding rates, not constrained-output throughput or
-long-prompt prefill rates. Raw result:
-[`evidence/tps-20261104-111247.json`](evidence/tps-20261104-111247.json).
-
-Quality, on a persisted 807-item suite (766 raw correct, 97.2% displayed overall):
-
-- **Zero request errors**, both runs.
-- **Identical pass/fail on every paired item** - no category gained, none lost.
-- All 12 long-context recall checks through 256K passed.
-
-See [docs/MEASUREMENTS.md](docs/MEASUREMENTS.md) for methodology and the caveats
-that matter (including what was *not* tested).
+[Raw comparison results](evidence/fresh-comparison-20261104) ·
+[Methodology and historical measurements](docs/MEASUREMENTS.md) ·
+[Boot test](evidence/reboot-20261104/reboot.json)
 
 ## What actually changed
 
