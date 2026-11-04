@@ -15,20 +15,26 @@ without taking the measured slowdown of a wholesale engine replacement.
 ## Performance (2026-11-04)
 
 Measured on the same two DGX Sparks with the same benchmark, prompts, seeds and
-requested concurrency. Each recipe retained its weights and settings. Results
-are medians of two runs after one discarded warm-up.
+requested concurrency. Each recipe retained its weights and settings. All runs
+below were collected after reboot, after one discarded warm-up per recipe.
+**Each row is one measured run; no cross-run averages or medians are shown.**
+Within each run, code/prose TPS are the harness's median across three requests;
+four-request aggregate is total completion tokens divided by concurrent batch time.
 
-| Recipe | Code tok/s | Prose tok/s | Four-request aggregate tok/s | API benchmark | Quality score* |
+| Recipe / individual run | Code tok/s | Prose tok/s | Four-request aggregate tok/s | Functional checks passed | Quality score* |
 |---|---:|---:|---:|---:|---:|
-| [Mia](https://github.com/MiaAI-Lab/DeepSeek-v4.1-Flash-1017-2x-DGX-Sparks) | 100.67 | 73.36 | 170.88 | 13/14 | 97.2%; 766/807 |
-| [Jay](https://github.com/jayleaton/deepseek-v41-tensorfold-spark) | 90.10 | 63.98 | 84.58† | 14/14 | 96.7%; 763/807 |
-| **Hybrid** | **101.84** | **74.14** | **172.87** | **14/14** | **97.2%; 766/807** |
+| [Mia](https://github.com/MiaAI-Lab/DeepSeek-v4.1-Flash-1017-2x-DGX-Sparks), run 1 | 100.72 | 73.42 | 170.92 | 13/14 | 97.2%; 766/807 |
+| Mia, run 2 | 100.62 | 73.30 | 170.85 | 13/14 | 97.2%; 766/807 |
+| [Jay](https://github.com/jayleaton/deepseek-v41-tensorfold-spark), run 1 | 90.07 | 64.15 | 120.55 | 14/14 | 96.7%; 763/807 |
+| Jay, run 2 | 90.13 | 63.81 | 48.60 | 14/14 | 96.7%; 763/807 |
+| **Hybrid, run 1** | **101.77** | **74.16** | **172.73** | **14/14** | **97.2%; 766/807** |
+| **Hybrid, run 2** | **101.91** | **74.12** | **173.01** | **14/14** | **97.2%; 766/807** |
+| Hybrid, closing repeat | 97.30 | 70.82 | 167.78 | 14/14 | 97.2%; 766/807 |
 
-- **Speed preserved, not a proven speedup over Mia:** the ~1.1% difference is
-  smaller than observed session drift. A closing hybrid check measured
-  97.30 / 70.82 / 167.78 tok/s (code / prose / aggregate).
-- **† Jay's concurrent throughput was unstable:** measured runs were 48.60 and
-  120.55 tok/s. The median is not a reliable capacity estimate.
+- **Speed preserved, not a proven speedup over Mia:** the closing hybrid repeat
+  shows session drift larger than its opening advantage over Mia.
+- **Jay's concurrent throughput was unstable:** both measured results are shown
+  rather than combined into a single capacity estimate.
 - Mia's sole failed API benchmark check was JSON Schema; ordinary checks passed.
 - *Quality uses the latest available 807-item runs, collected separately from
   this TPS comparison. Displayed percentages are category averages. All three
