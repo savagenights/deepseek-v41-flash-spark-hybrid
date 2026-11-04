@@ -123,8 +123,9 @@ Full detail, including the exact commands and the recovery semantics:
 - **No disk sessions, no KV sharding/compaction/pruning.** Upstream RAM prefix caching
   is retained: 5.20 s cold vs 0.92 s on a 10,240-token repeat, cold again after a
   process restart. That is caching, not persistence.
-- **No physical reboot test.** Boot wiring and an induced pair recovery were tested;
-  a real power cycle was not.
+- **Real OS reboot tested on both hosts.** Automatic startup reached ready 45.76 s
+  after head boot, with zero retries; post-boot contracts passed 20/20. Worker booted
+  ~43 s earlier. Abrupt power loss and the reverse boot ordering remain untested.
 - **1M context not exercised.** 256K was.
 
 ## Rollback

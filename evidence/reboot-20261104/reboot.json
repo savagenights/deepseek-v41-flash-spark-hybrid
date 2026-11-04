@@ -1,0 +1,23 @@
+{
+  "checked_at": 1793819117.3286529,
+  "head_boot_id": "761c3a54-9a28-4791-9dcc-4c66958b438c",
+  "worker_boot_id": "a4f09c06-2e6c-4396-a9be-9a823b769634",
+  "automatic_start": true,
+  "manual_model_start": false,
+  "boot_to_ready_seconds": 45.76046299934387,
+  "supervisor_restarts": 0,
+  "image_id": "sha256:5a3f8e3b99407f8e91b10d6e3a351058d0a7e08e3d8b7b4da1f1e94df5f80259",
+  "api_contract_passed": 20,
+  "api_contract_total": 20,
+  "session_passed": 3,
+  "code_tok_s": 102.03860549687032,
+  "prose_tok_s": 74.09148042203273,
+  "aggregate_tok_s": 172.24217514378446,
+  "health_ok": true,
+  "notes": [
+    "User rebooted both hosts; worker booted about 43 seconds before head.",
+    "Retained rank caches read 95.1 GiB per rank in approximately 9-10 seconds.",
+    "Initial session harness invocation lacked body.json; saved pre-reboot body copied and rerun passed.",
+    "Observed startup beats earlier full-safetensors-load estimate; fresh cacheless setup not tested."
+  ]
+}

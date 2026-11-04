@@ -67,8 +67,12 @@ passing runs is decoration.
 
 ## What was not tested
 
-- Physical power cycle / full machine reboot. Boot wiring and induced pair recovery
-  were tested; a real reboot was not.
+- Abrupt power loss and reverse boot ordering. A real OS reboot of both hosts was
+  tested on 2026-11-04: automatic ready 45.76 s after head boot, zero retries,
+  worker booted ~43 s earlier. Post-boot 20/20 contracts, 3/3 session checks and
+  14/14 benchmark checks passed. Observed code/prose/aggregate rates were
+  102.04/74.09/172.24 tok/s; no fresh original baseline was run, so these are not
+  claimed as a hybrid speedup.
 - 1M context. 256K was exercised.
 - Disk-backed sessions, KV sharding, compaction, pruning - not implemented here.
 - Imported JPEG/WebP image stack beyond the red PNG API contract test.

@@ -98,11 +98,11 @@ After successful promotion:
 - Memory guards watch both ranks: soft floor 3.5 GiB held for 2 s, hard floor 2.5 GiB. These use OS `MemAvailable`, because GPU and CPU share Spark memory.
 - Promotion intentionally stops the head container and requires systemd to replace **both** rank containers and recover health. The result is recorded in the deployment report.
 
-A physical reboot/power-cycle is not part of this test. Boot configuration and automatic pair recovery are checked separately.
+A real two-host OS reboot was subsequently tested on 2026-11-04. Both boot IDs changed; the hybrid started without manual intervention and was ready 45.76 seconds after head boot, with zero supervisor retries. The worker booted approximately 43 seconds earlier, so this does not prove every boot ordering or an abrupt power-loss scenario. Post-boot: 20/20 API contracts, 3/3 saved-prefix/continuation checks, and 14/14 benchmark checks passed. Evidence: `evidence/reboot-20261104/reboot.json` in the public repository.
 
 ### What happens at boot
 
-Verified by inspection, not by a real reboot:
+Boot wiring inspected and automatic startup observed in the real reboot above:
 
 - Head user lingering is enabled (`loginctl show-user cell --property=Linger` -> `yes`), so the user manager starts without a login.
 - `dsv41-hybrid.service` is enabled and linked from `default.target.wants`, so it is pulled in at boot.
@@ -115,7 +115,7 @@ Ordering caveat: `After=network-online.target` in a **user** unit does not pull 
 
 ### Cold start is not free
 
-Nothing pre-loads the weights. The service start *is* the load: ~197 GB of safetensors into unified memory.
+The service loads model data into unified memory automatically. The installed deployment retains per-rank disk caches: on the real reboot, each rank reported reading 95.1 GiB of expert entries in approximately 9-10 seconds. It did not reread the full safetensors checkpoint through NFS as previously estimated.
 
 Measured on the current pair:
 
@@ -124,7 +124,7 @@ Measured on the current pair:
 
 The worker's `/hf` is a Docker `local` volume backed by NFS4 (`addr=10.100.40.2`, `ro`, `hard`), mounted by Docker at container start. Because it is a `hard` mount, an unavailable export blocks I/O rather than failing fast.
 
-So expect roughly **3-4 minutes** from boot to healthy, versus the 37-43 s measured for warm restarts. `ready()` has a fixed 600 s deadline; a cold start slow enough to exceed it will exit, systemd will restart the pair, and the load begins again. That is the one boot path worth watching on a real reboot.
+The earlier **3-4 minute** estimate extrapolated full-checkpoint reads and was not representative of this installed cached deployment. Observed head boot-to-ready was **45.76 seconds**, including approximately 36 seconds from supervisor start. Fresh/cacheless builds remain untested. `ready()` retains a fixed 600-second deadline; an unusually slow start can still cause a retry.
 
 Disk headroom is also tight on the head: 324 GB free on a 3.7 TB root filesystem (91% used) with a 711 GB HF cache.
 
