@@ -9,8 +9,8 @@ and adds one capability: **decoder-enforced structured output** (JSON Schema, re
 choice, EBNF) on rank 0.
 
 No new base model. No new kernels. No measurable quality or throughput change for
-ordinary requests. That was the whole point: the newer full-engine stacks were
-**12-29% slower** for a model that is identical.
+ordinary requests in matched testing. The goal was to add structured decoding
+without taking the measured slowdown of a wholesale engine replacement.
 
 ## Measured result (same weights, same prompts, same machine)
 
@@ -22,6 +22,42 @@ ordinary requests. That was the whole point: the newer full-engine stacks were
 
 Across every matched run the spread was **-0.60% to +0.36%**. Cold ~8K TTFT was
 3.817 s vs 3.822 s.
+
+### How the standalone recipes compared
+
+These are measurements of the tested, pinned versions on this pair of Sparks,
+not claims about every configuration or future release:
+
+| Tested stack | Result relative to the original installed Mia deployment |
+|---|---|
+| [Original Mia recipe](https://github.com/MiaAI-Lab/DeepSeek-v4.1-Flash-1017-2x-DGX-Sparks) | Baseline in the table above |
+| [Jay's complete recipe](https://github.com/jayleaton/deepseek-v41-tensorfold-spark) | Approximately 12% slower warmed prose and 22% lower concurrent throughput |
+| Newer engine with original Mia weights | Approximately 12% slower code, 22% slower prose, 29% lower concurrent throughput |
+| This hybrid | Matched ordinary throughput within 0.6% of original Mia; adds constrained decoding |
+
+The Jay recipe and the newer-engine/original-weights experiment are **different
+experiments**. Neither is the deployed hybrid. All use the same base model;
+runtime, quantization and policy differences are not a model-intelligence upgrade.
+
+### Latest TPS rerun after reboot (2026-11-04)
+
+| Measurement | Earlier original Mia | Latest hybrid | Apparent difference |
+|---|---:|---:|---:|
+| Code decode | 91.06 tok/s | 102.14 tok/s | +12.2% |
+| Prose decode | 66.30 tok/s | 74.29 tok/s | +12.0% |
+| 4-request aggregate | 154.78 tok/s | 173.75 tok/s | +12.2% |
+
+**This is not evidence of a 12% hybrid speedup.** The original numbers were
+collected before reboot; neither standalone recipe was rerun alongside this
+latest test. The reason for the higher post-reboot operating speed has not been
+isolated. The matched comparison above remains the basis for the claim that
+ordinary speed was preserved. A fresh same-condition baseline is required to
+claim an improvement over either standalone recipe.
+
+The latest run passed 14/14 checks; median code/prose TTFT was 139/102 ms.
+These are ordinary decoding rates, not constrained-output throughput or
+long-prompt prefill rates. Raw result:
+[`evidence/tps-20261104-111247.json`](evidence/tps-20261104-111247.json).
 
 Quality, on a persisted 807-item suite (766 raw correct, 97.2% displayed overall):
 
