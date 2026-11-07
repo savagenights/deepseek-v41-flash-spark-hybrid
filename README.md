@@ -103,8 +103,9 @@ Environment overrides (defaults reproduce the reference deployment):
 
 ```
 SPARK_HYBRID_ROOT   ~/spark-hybrid-20261031
-SPARK_WORKER        cell@10.100.40.1
-SPARKDASH_QUALITY_URL  required only for the SparkDash quality runner
+SPARK_WORKER        10.100.40.1  (no user: ssh logs in as whoever runs the recipe; set user@host to override)
+SPARKDASH_QUALITY_URL  required for the SparkDash quality runner; the rollback scripts
+                       use it to cancel their own run, and skip that step when unset
 ```
 
 ## Reproduce
